@@ -40,6 +40,9 @@ y_pos_barra_conc = 565
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
+RED = (255, 50, 0)
+BLUE = (0, 50, 255)
+YELLOW = (255, 255, 0)
 # cor botao
 red_botao = 255
 green_botao = 0
@@ -59,6 +62,9 @@ teclando = pygame.mixer.Sound(os.path.join('Sons', "one-click.mp3"))
 teclando.set_volume(0.65)
 resposta_errada = pygame.mixer.Sound(os.path.join('Sons', 'resposta_errada.mp3'))
 resposta_errada.set_volume(0.3)
+som_acabou_o_tempo = pygame.mixer.Sound(os.path.join('Sons', 'som_acabou_o_tempo.mpeg'))
+som_acabou_o_tempo.set_volume(0.15)
+
 # localizacao do botao na tela
 x_pos_botao = 250
 y_pos_botao = 80
@@ -72,6 +78,7 @@ y_pos_caixa = altura_janela / 2 - y_tam_caixa / 2
 # definicao das fontes dos textos
 fonte_1 = pygame.font.SysFont('arial', 27, True, False)
 fonte_2 = pygame.font.SysFont('arial', 22, True, False)
+fonte_timer = pygame.font.SysFont('Rubik Wet Paint', 35, False, True)
 
 # imagens
 img_xicara_cafe = pygame.image.load(os.path.join('Imagens', 'xicara.png')).convert_alpha()
@@ -98,7 +105,7 @@ clk = pygame.time.Clock()
 
 # variáveis de input e texto base a ser digitado
 input_text = ''
-cor_input_box = WHITE
+cor_input_box = (180, 180, 180)  # começa com um tom cinza quando está selecionado
 texto_base = ''
 
 # Cria uma fila e a preenche com caracteres do arquivo de algoritmos
@@ -113,18 +120,26 @@ while linha_arquivo:
 
 arquivo_algoritmos.seek(0)  # retorna para a primeira linha do arquivo
 linha_arquivo_atual = ''
-fila = fila.Fila()
+minha_fila = fila.Fila()
+COR_ALGORITMOS = [GREEN, YELLOW, RED]
+cor_algoritmo_atual = 0
 
 # Este indice é utilizado para saber a partição atual da 'string' que já foi acertada
 indice_caractere_atual = 0
 
 # Define o acesso à caixa de texto como falso
 active = False
+timer_cursor = 0.5
 
 # Mensagens
 titulos_algoritmos = ['Numero primo', 'PA', 'Sacar no Banco']
 codigo_indice = -1
 msg_algoritmo = f'Algoritmo {codigo_indice + 1}: {titulos_algoritmos[codigo_indice]}'
+
+# Timer para digitar o trecho de código
+delay_trecho_codigo = 15
+timer_trecho_codigo = delay_trecho_codigo
+msg_timer = f'Tempo: {timer_trecho_codigo:2.2f}'
 
 while True:
     # Definicao do framerate do jogo
@@ -141,7 +156,7 @@ while True:
         red_botao = 0
 
     #  Lógica para troca de linhas no algoritmo
-    if fila.vazia():
+    if minha_fila.vazia():
         indice_linha_atual += 1
         texto_base = ''
         indice_caractere_atual = 0
@@ -154,7 +169,7 @@ while True:
             codigo_indice += 1
         linha_arquivo_atual = linha_arquivo_atual.strip()
         for caractere in linha_arquivo_atual:
-            fila.insere(caractere)
+            minha_fila.insere(caractere)
             texto_base += caractere
 
     # Desenhos
@@ -178,8 +193,6 @@ while True:
     red_barra_concentracao = (1 - barra_concentracao_porcentagem) * 255 % 256
     green_barra_concentracao = barra_concentracao_porcentagem * 255 % 256
 
-    # Botao:
-    # botao = pygame.draw.rect(tela, (red_botao, green_botao, 0), (x_pos_botao, y_pos_botao, 100, 100))
     # Textos:
     tela_textos = pygame.draw.rect(tela, (51, 153, 255), (x_pos_caixa, y_pos_caixa, x_tam_caixa, y_tam_caixa))
     input_texto_box = pygame.draw.rect(tela, cor_input_box, (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 35))
@@ -195,26 +208,32 @@ while True:
     for token in texto_base[0:indice_caractere_atual]:
         texto += token
     msg_texto = f'{texto}'
-    msg_format_texto_base = fonte_2.render(msg_texto, False, GREEN)
-    tela.blit(msg_format_texto_base, (x_pos_caixa + 68, y_pos_caixa + 80))
+    msg_timer = f'Tempo: {timer_trecho_codigo:2.2f}'
 
     # Formatando textos
+    msg_format_texto_base = fonte_2.render(msg_texto, False, COR_ALGORITMOS[cor_algoritmo_atual])
     msg_algoritmo = f'Algoritmo {codigo_indice + 1}: {titulos_algoritmos[codigo_indice]}'
     msg_format_algoritmo = fonte_1.render(msg_algoritmo, False, WHITE)
     msg_format_input_text = fonte_2.render(input_text, False, BLACK)
     largura_input_texto = msg_format_input_text.get_width()
+    if timer_trecho_codigo <= 5.00:
+        cor_timer_perigo = RED
+    else:
+        cor_timer_perigo = WHITE
+    msg_format_texto_timer_safe = fonte_timer.render(msg_timer[0:6], False, WHITE)
+    msg_format_texto_timer_perigo = fonte_timer.render(msg_timer[7:], False, cor_timer_perigo)
 
     # Colocando textos na tela
+    tela.blit(msg_format_texto_timer_safe, (50, 50))
+    tela.blit(msg_format_texto_timer_perigo, (150, 50))
+    tela.blit(msg_format_texto_base, (x_pos_caixa + 68, y_pos_caixa + 80))
     tela.blit(tela, deslocamento)  # Atualiza a tela com um screen shake quando o player erra
     tela.blit(msg_format_algoritmo, (x_pos_caixa + (x_tam_caixa/2) - msg_format_algoritmo.get_width()/2,
                                      y_pos_caixa + 20))
     tela.blit(msg_format_input_text, (x_pos_caixa + 40, y_pos_caixa + 140))
 
-    # Colocando imagens na tela
+    # Colocando imagens na tela (xicara e cerebro)
     grupo_sprites_permanentes.draw(tela)
-
-    # Controle da decrementacao das barras
-    largura_barra_energia -= 0.4
 
     # Animando a xicara de café quando a energia está baixa
     if largura_barra_energia <= 400:
@@ -231,6 +250,21 @@ while True:
         deslocamento[1] = randint(0, 8) - 4
     else:
         deslocamento = [0, 0]
+
+    # Trabalhando com o tempo para digitar
+    timer_trecho_codigo -= 0.0375
+
+    # Trabalhando com o tempo para o cursor ficar piscando
+    timer_cursor -= 0.06
+    if timer_cursor < - 0.5:
+        timer_cursor = 0.5
+
+    # Criando o cursor se a input box está ativa (e de acordo com o timer do cursor pra ele piscar)
+    if active and timer_cursor > 0:
+        cursor = pygame.draw.rect(tela, BLACK, (x_pos_caixa + 30 + msg_format_input_text.get_width() + 10,
+                                                y_pos_caixa + 140, 3, msg_format_input_text.get_height()))
+    # Controle da decrementacao das barras
+    largura_barra_energia -= 0.4
 
     # Eventos do jogo
     for event in pygame.event.get():
@@ -249,10 +283,10 @@ while True:
             # Se o usuário clicar na caixa de texto, ativá-la. Se clicar fora da caixa, desativá-la
             if input_texto_box.collidepoint(pos):
                 active = True
-                cor_input_box = (180, 180, 180)  # uma cor cinza ao clicar na caixa de texto da entrada
+                cor_input_box = WHITE  # cor branca ao clicar na caixa de texto da entrada
             else:
                 active = False
-                cor_input_box = WHITE  # cor padrão branca quando a entrada não está selecionada
+                cor_input_box = (180, 180, 180)  # cor padrão branca quando a entrada não está selecionada
 
         # Verificando o pressionar das teclas
         if event.type == pygame.KEYDOWN:
@@ -262,7 +296,7 @@ while True:
                 elif largura_input_texto < 415:
                     input_text += event.unicode
                 # Se a fila estiver vazia, o jogador venceu o jogo
-                if not fila.vazia() and largura_input_texto < 415:
+                if not minha_fila.vazia() and largura_input_texto < 415:
 
                     not_unicodes_especiais = event.key != pygame.K_SPACE and event.key != pygame.K_LSHIFT and \
                                              event.key != pygame.K_RSHIFT and event.key != pygame.K_CAPSLOCK and \
@@ -274,19 +308,27 @@ while True:
                     # Se a fila não é vazia, verifica se a entrada do usuario é igual à primeira letra da fila e, se
                     # for, a remove e altera a cor da letra acertada para verde (atualiza o vetor de caracteres
                     # corretos)
-                    if event.unicode == fila.primeiro.dado:
+                    if event.unicode == minha_fila.primeiro.dado:
                         teclando.play()
-                        fila.remove()
+                        minha_fila.remove()
                         indice_caractere_atual += 1
                     elif not_unicodes_especiais:
                         screen_shake = 7
                         largura_barra_concentracao -= 40
-                        #teclando.play()
                         resposta_errada.play()
 
     # limpa a caixa de texto de input ao trocar de linha no arquivo
-    if fila.vazia():
+    if minha_fila.vazia():
         input_text = ''
+        cor_algoritmo_atual += 1
+        timer_trecho_codigo = delay_trecho_codigo
+    elif timer_trecho_codigo <= 0:
+        input_text = ''
+        minha_fila = fila.Fila()
+        som_acabou_o_tempo.play()
+        screen_shake = 10
+        largura_barra_concentracao -= 100
+        timer_trecho_codigo = delay_trecho_codigo
 
     # Esgotamento da barra de energia
     if largura_barra_energia <= 0 or largura_barra_concentracao <= 0:
