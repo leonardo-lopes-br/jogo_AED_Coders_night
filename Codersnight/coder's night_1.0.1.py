@@ -43,6 +43,7 @@ GREEN = (0, 255, 0)
 RED = (255, 50, 0)
 BLUE = (0, 50, 255)
 YELLOW = (255, 255, 0)
+ROXO = (153, 51, 153)
 # cor botao
 red_botao = 255
 green_botao = 0
@@ -115,14 +116,17 @@ indice_linha_atual = 0  # para finalizar o jogo quando chegar no numero de linha
 numero_linhas_arquivo = 0
 linha_arquivo = arquivo_algoritmos.readline()
 while linha_arquivo:
-    numero_linhas_arquivo += 1
+    linha_arquivo = linha_arquivo[:-1]
+    if not linha_arquivo == '#':
+        numero_linhas_arquivo += 1
     linha_arquivo = arquivo_algoritmos.readline()
+print(numero_linhas_arquivo)
 
 arquivo_algoritmos.seek(0)  # retorna para a primeira linha do arquivo
 linha_arquivo_atual = ''
 minha_fila = fila.Fila()
-COR_ALGORITMOS = [GREEN, YELLOW, RED]
-cor_algoritmo_atual = 0
+COR_ALGORITMOS = [GREEN, YELLOW, ROXO]
+cor_algoritmo_atual = -1
 
 # Este indice é utilizado para saber a partição atual da 'string' que já foi acertada
 indice_caractere_atual = 0
@@ -132,12 +136,20 @@ active = False
 timer_cursor = 0.5
 
 # Mensagens
-titulos_algoritmos = ['Numero primo', 'PA', 'Sacar no Banco']
 codigo_indice = -1
+titulos_algoritmos = ['Numero primo', 'PA', 'Sacar no Banco']
 msg_algoritmo = f'Algoritmo {codigo_indice + 1}: {titulos_algoritmos[codigo_indice]}'
 
+msg_progresso = f'Progresso'
+x_pos_progresso = x_pos_caixa + x_tam_caixa/2
+y_pos_progresso = y_pos_caixa + y_tam_caixa - 95
+
+msg_input_placeholder = f'Digite aqui...'
+x_pos_placeholder = x_pos_caixa + 40
+y_pos_placeholder = y_pos_caixa + 140
+
 # Timer para digitar o trecho de código
-delay_trecho_codigo = 15
+delay_trecho_codigo = 30  # estava 15 (e tava dificil)
 timer_trecho_codigo = delay_trecho_codigo
 msg_timer = f'Tempo: {timer_trecho_codigo:2.2f}'
 
@@ -164,6 +176,7 @@ while True:
         linha_arquivo_atual = linha_arquivo_atual[:-1]
         # Condição de troca de algoritmo
         if linha_arquivo_atual == '#':
+            cor_algoritmo_atual += 1
             linha_arquivo_atual = arquivo_algoritmos.readline()
             linha_arquivo_atual = linha_arquivo_atual[:-1]
             codigo_indice += 1
@@ -195,9 +208,22 @@ while True:
 
     # Textos:
     tela_textos = pygame.draw.rect(tela, (51, 153, 255), (x_pos_caixa, y_pos_caixa, x_tam_caixa, y_tam_caixa))
+    tela_textos_contorno = pygame.draw.rect(tela, COR_ALGORITMOS[cor_algoritmo_atual],
+                                            (x_pos_caixa - 2, y_pos_caixa - 2,
+                                             x_tam_caixa + 2, y_tam_caixa + 2), 5)
     input_texto_box = pygame.draw.rect(tela, cor_input_box, (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 35))
     input_texto_contorno = pygame.draw.rect(tela, BLACK,
                                             (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 35), 3)
+
+    # Barra de porcentagem concluída do algoritmo atual
+    barra_progresso_algoritmo_fundo = pygame.draw.rect(tela, WHITE, (x_pos_caixa + 40, y_pos_caixa + y_tam_caixa - 55,
+                                                                     x_tam_caixa - 80, 35))
+    barra_progresso_algoritmo_real = pygame.draw.rect(tela, GREEN, (x_pos_caixa + 40, y_pos_caixa + y_tam_caixa - 55,
+                                                                    (indice_linha_atual - 1)/numero_linhas_arquivo *
+                                                                    (x_tam_caixa - 80), 35))
+    barra_progresso_algoritmo_contorno = pygame.draw.rect(tela, BLACK,
+                                                          (x_pos_caixa + 38, y_pos_caixa + y_tam_caixa - 57,
+                                                           x_tam_caixa - 78, 37), 3)
 
     # Mostra a sentença algorítica a ser digitada (em branco) -> fica por baixo dos caracteres verdes (corretos)
     linha_arquivo_renderizar = fonte_2.render(linha_arquivo_atual, False, WHITE)
@@ -214,6 +240,8 @@ while True:
     msg_format_texto_base = fonte_2.render(msg_texto, False, COR_ALGORITMOS[cor_algoritmo_atual])
     msg_algoritmo = f'Algoritmo {codigo_indice + 1}: {titulos_algoritmos[codigo_indice]}'
     msg_format_algoritmo = fonte_1.render(msg_algoritmo, False, WHITE)
+    msg_format_progresso = fonte_2.render(msg_progresso, False, WHITE)
+    msg_format_placeholder = fonte_2.render(msg_input_placeholder, False, (100, 100, 100))
     msg_format_input_text = fonte_2.render(input_text, False, BLACK)
     largura_input_texto = msg_format_input_text.get_width()
     if timer_trecho_codigo <= 5.00:
@@ -224,13 +252,17 @@ while True:
     msg_format_texto_timer_perigo = fonte_timer.render(msg_timer[7:], False, cor_timer_perigo)
 
     # Colocando textos na tela
+    tela.blit(msg_format_progresso, (x_pos_progresso - msg_format_progresso.get_width()/2, y_pos_progresso))
     tela.blit(msg_format_texto_timer_safe, (50, 50))
     tela.blit(msg_format_texto_timer_perigo, (150, 50))
     tela.blit(msg_format_texto_base, (x_pos_caixa + 68, y_pos_caixa + 80))
     tela.blit(tela, deslocamento)  # Atualiza a tela com um screen shake quando o player erra
-    tela.blit(msg_format_algoritmo, (x_pos_caixa + (x_tam_caixa/2) - msg_format_algoritmo.get_width()/2,
+    tela.blit(msg_format_algoritmo, (x_pos_caixa + (x_tam_caixa / 2) - msg_format_algoritmo.get_width() / 2,
                                      y_pos_caixa + 20))
     tela.blit(msg_format_input_text, (x_pos_caixa + 40, y_pos_caixa + 140))
+    # Só mostra o placeholder (Digite aqui...) quando a caixa de input não está ativa e não tem nada escrito nela
+    if input_text == '' and not active:
+        tela.blit(msg_format_placeholder, (x_pos_placeholder, y_pos_placeholder))
 
     # Colocando imagens na tela (xicara e cerebro)
     grupo_sprites_permanentes.draw(tela)
@@ -320,7 +352,6 @@ while True:
     # limpa a caixa de texto de input ao trocar de linha no arquivo
     if minha_fila.vazia():
         input_text = ''
-        cor_algoritmo_atual += 1
         timer_trecho_codigo = delay_trecho_codigo
     elif timer_trecho_codigo <= 0:
         input_text = ''
