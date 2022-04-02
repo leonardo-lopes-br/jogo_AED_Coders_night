@@ -20,7 +20,6 @@ largura_max = 1000
 largura_barra_energia = largura_max
 largura_barra_concentracao = largura_max
 
-
 x_pos_barra_energia = 100
 y_pos_barra_energia = 640
 
@@ -56,15 +55,17 @@ y_pos_botao = 80
 # caixa de texto
 x_tam_caixa = 500
 y_tam_caixa = 300
-x_pos_caixa = largura_janela/2 - x_tam_caixa/2
-y_pos_caixa = altura_janela/2 - y_tam_caixa/2
+x_pos_caixa = largura_janela / 2 - x_tam_caixa / 2
+y_pos_caixa = altura_janela / 2 - y_tam_caixa / 2
 
 # definicao das fontes dos textos
 fonte_1 = pygame.font.SysFont('arial', 27, True, False)
 fonte_2 = pygame.font.SysFont('arial', 22, True, False)
 
 # imagens
-img_1 = pygame.image.load("fundo.jpg")  # imagem teste de fundo
+img_xicara_cafe = pygame.image.load('xicara.png')
+rect_img_xicara_cafe = img_xicara_cafe.get_rect()
+# img_1 = pygame.image.load("fundo.jpg")  # imagem teste de fundo
 
 # tela do jogo
 tela = pygame.display.set_mode((largura_janela, altura_janela))
@@ -93,7 +94,6 @@ arquivo_algoritmos.readline()  # ignora a primeira linha, que é o nome do algor
 linha_arquivo_atual = ''
 fila = fila.Fila()
 
-
 # Este indice é utilizado para saber a partição atual da 'string' que já foi acertada
 indice_caractere_atual = 0
 
@@ -101,7 +101,7 @@ indice_caractere_atual = 0
 active = False
 
 # Mensagens
-msg_cafe = f"Tomar Café"
+# msg_cafe = f"Tomar Café"
 msg_barra_energia = f"Barra de Energia"
 msg_barra_conc = f"Barra de Concentração"
 msg_algoritmo = f'Algoritmo'
@@ -109,7 +109,8 @@ msg_algoritmo = f'Algoritmo'
 while True:
     # Definicao do framerate do jogo
     clk.tick(25)
-    tela.blit(img_1, (0, 0))  # Definicao do fundo do jogo
+    # tela.blit(img_1, (0, 0))  # Definicao do fundo do jogo
+    tela.fill(BLACK)
 
     # Controle das cores dinamicas
     # Botao cafe
@@ -136,9 +137,14 @@ while True:
     # Barra de energia:
     barra_energia = pygame.draw.rect(tela, (red_barra_energia, green_barra_energia, 0),
                                      (x_pos_barra_energia, y_pos_barra_energia, largura_barra_energia, 40))
+    barra_energia_contorno = pygame.draw.rect(tela, WHITE, (x_pos_barra_energia - 2, y_pos_barra_energia - 2,
+                                                            largura_barra_energia + 2, 42), 3)
     # Barra de concentracao:
     barra_conc = pygame.draw.rect(tela, (red_barra_concentracao, green_barra_concentracao, 0),
                                   (x_pos_barra_conc, y_pos_barra_conc, largura_barra_concentracao, 40))
+    barra_concentracao_contorno = pygame.draw.rect(tela, WHITE, (x_pos_barra_conc - 2, y_pos_barra_conc - 2,
+                                                                 largura_barra_concentracao + 2, 42), 3)
+
     # Porcentagem para controlar a cor das barras (energia e concentração)
     barra_energia_porcentagem = largura_barra_energia / largura_max
     red_barra_energia = (1 - barra_energia_porcentagem) * 255 % 256
@@ -149,7 +155,7 @@ while True:
     green_barra_concentracao = barra_concentracao_porcentagem * 255 % 256
 
     # Botao:
-    botao = pygame.draw.rect(tela, (red_botao, green_botao, 0), (x_pos_botao, y_pos_botao, 100, 100))
+    # botao = pygame.draw.rect(tela, (red_botao, green_botao, 0), (x_pos_botao, y_pos_botao, 100, 100))
     # Textos:
     tela_textos = pygame.draw.rect(tela, (51, 153, 255), (x_pos_caixa, y_pos_caixa, x_tam_caixa, y_tam_caixa))
     input_texto_box = pygame.draw.rect(tela, cor_input_box, (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 30))
@@ -169,22 +175,24 @@ while True:
     tela.blit(msg_format_texto_base, (x_pos_caixa + 68, y_pos_caixa + 80))
 
     # Formatando textos
-    msg_format_cafe = fonte_1.render(msg_cafe, False, WHITE)
+    # msg_format_cafe = fonte_1.render(msg_cafe, False, WHITE)
     msg_format_energia = fonte_1.render(msg_barra_energia, False, WHITE)
     msg_format_conc = fonte_1.render(msg_barra_conc, False, WHITE)
     msg_format_algoritmo = fonte_1.render(msg_algoritmo, False, WHITE)
     msg_format_input_text = fonte_2.render(input_text, False, BLACK)
+    largura_input_texto = msg_format_input_text.get_width()
 
     # Colocando textos na tela
-    tela.blit(msg_format_cafe, (200, 20))
+    # tela.blit(msg_format_cafe, (200, 20))
     tela.blit(msg_format_energia, (105, 645))
     tela.blit(msg_format_conc, (105, 570))
     tela.blit(msg_format_algoritmo, (x_pos_caixa + 175, y_pos_caixa + 20))
     tela.blit(msg_format_input_text, (x_pos_caixa + 40, y_pos_caixa + 135))
 
+
     # Controle da decrementacao das barras
-    largura_barra_energia -= 0.1  # valor estava em 1 (retornar)
-    largura_barra_concentracao -= 0.2
+    largura_barra_energia -= 0.4  # valor estava em 1 (retornar)
+    # largura_barra_concentracao -= 0.2
 
     # Eventos do jogo
     for event in pygame.event.get():
@@ -195,13 +203,6 @@ while True:
         # Deteccao de LEFT CLICK
         if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
-            # Se o botao de beber cafe for pressionado
-            if botao.collidepoint(pos):
-                if largura_barra_energia >= 400:
-                    print("Nao é possivel tomar cafe ainda!")
-                else:
-                    largura_barra_energia += 350
-                    drinking_sound.play()
             # Se o usuário clicar na caixa de texto, ativá-la. Se clicar fora da caixa, desativá-la
             if input_texto_box.collidepoint(pos):
                 active = True
@@ -215,10 +216,10 @@ while True:
             if active:
                 if event.key == pygame.K_BACKSPACE:
                     input_text = input_text[:-1]
-                else:
+                elif largura_input_texto < 415:
                     input_text += event.unicode
                 # Se a fila estiver vazia, o jogador venceu o jogo
-                if not fila.vazia():
+                if not fila.vazia() and largura_input_texto < 415:
 
                     not_unicodes_especiais = event.key != pygame.K_SPACE and event.key != pygame.K_LSHIFT and \
                                              event.key != pygame.K_RSHIFT and event.key != pygame.K_CAPSLOCK and \
@@ -236,7 +237,7 @@ while True:
                         indice_caractere_atual += 1
                     elif not_unicodes_especiais:
                         largura_barra_concentracao -= 40
-                        largura_barra_energia -= 20
+                        # largura_barra_energia -= 20
                         teclando.play()
 
     # limpa a caixa de texto de input ao trocar de linha no arquivo
@@ -256,4 +257,6 @@ while True:
         pygame.quit()
         exit()
 
+    # Colocando imagens na tela
+    tela.blit(img_xicara_cafe, (x_pos_barra_energia - 15, y_pos_barra_energia))
     pygame.display.flip()

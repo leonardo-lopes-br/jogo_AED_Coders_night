@@ -5,6 +5,18 @@ from sys import exit
 
 def game_end(final):
     if final == 'derrota':
-        pass
+        derrota()
     elif final == 'vitoria':
-        pass
+        vitoria()
+
+
+def derrota():
+    pass
+
+
+def vitoria():
+    pass
+
+
+def contorno_rect():
+    pass
