@@ -7,6 +7,8 @@ from pygame.locals import *
 from sys import exit
 import fila
 import game_end
+from math import sin
+from random import randint
 # altera o caminho do terminal para o caminho do arquivo
 import os
 
@@ -14,6 +16,14 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # inicializacao da library do pygame
 pygame.init()
 pygame.key.set_repeat(300, 110)  # permite segurar uma tela (como apagar os caracteres com o backspace)
+
+# dimensoes da janela do jogo
+largura_janela = 1280
+altura_janela = 720
+
+# tela do jogo
+tela = pygame.display.set_mode((largura_janela, altura_janela))
+pygame.display.set_caption("Coder's Night")
 
 # dimensoes das barras
 largura_max = 1000
@@ -38,16 +48,17 @@ red_barra_energia = red_barra_concentracao = 0
 green_barra_energia = green_barra_concentracao = 255
 
 # musica de fundo
-pygame.mixer.music.load("musiquinha_fundo.flac")
+pygame.mixer.music.load(os.path.join('Sons', "musiquinha_fundo.flac"))
+pygame.mixer.music.set_volume(0.4)
 pygame.mixer.music.play(-1)  # tocando infinitamente
+
 # sons
-drinking_sound = pygame.mixer.Sound("sound_drinking.mp3")
-teclando = pygame.mixer.Sound("one-click.mp3")
-
-# dimensoes da janela do jogo
-largura_janela = 1280
-altura_janela = 720
-
+drinking_sound = pygame.mixer.Sound(os.path.join('Sons', "som_bebendo_cafe.mpeg"))
+drinking_sound.set_volume(0.2)
+teclando = pygame.mixer.Sound(os.path.join('Sons', "one-click.mp3"))
+teclando.set_volume(0.65)
+resposta_errada = pygame.mixer.Sound(os.path.join('Sons', 'resposta_errada.mp3'))
+resposta_errada.set_volume(0.3)
 # localizacao do botao na tela
 x_pos_botao = 250
 y_pos_botao = 80
@@ -63,24 +74,36 @@ fonte_1 = pygame.font.SysFont('arial', 27, True, False)
 fonte_2 = pygame.font.SysFont('arial', 22, True, False)
 
 # imagens
-img_xicara_cafe = pygame.image.load('xicara.png')
-rect_img_xicara_cafe = img_xicara_cafe.get_rect()
-# img_1 = pygame.image.load("fundo.jpg")  # imagem teste de fundo
+img_xicara_cafe = pygame.image.load(os.path.join('Imagens', 'xicara.png')).convert_alpha()
+img_xicara_cafe = pygame.transform.scale(img_xicara_cafe, (55, 55))
+valor_seno_alfa_xicara = 1.57
 
-# tela do jogo
-tela = pygame.display.set_mode((largura_janela, altura_janela))
-pygame.display.set_caption("Coder's Night")
+img_cerebro = pygame.image.load(os.path.join('Imagens', 'brain.png')).convert_alpha()
+img_cerebro = pygame.transform.scale(img_cerebro, (55, 55))
+
+# criando os objetos
+xicara_cafe = game_end.FiguraClicavel(img_xicara_cafe, (x_pos_barra_energia - 50, y_pos_barra_energia + 15))
+cerebro = game_end.FiguraClicavel(img_cerebro, (x_pos_barra_conc - 50, y_pos_barra_conc + 15))
+
+# Grupo para os sprites
+grupo_sprites_permanentes = pygame.sprite.Group()
+grupo_sprites_permanentes.add(xicara_cafe, cerebro)
+
+# Variaveis para tremer a tela com um erro do usuário
+screen_shake = 0
+deslocamento = [0, 0]
 
 # clock
 clk = pygame.time.Clock()
 
+# variáveis de input e texto base a ser digitado
 input_text = ''
 cor_input_box = WHITE
 texto_base = ''
 
 # Cria uma fila e a preenche com caracteres do arquivo de algoritmos
 # Abrindo o arquivo de algoritmos para o jogador digitar
-arquivo_algoritmos = open('algoritmos_textos.txt', 'r')
+arquivo_algoritmos = open(os.path.join('Textos', 'algoritmos_textos.txt'), 'r')
 indice_linha_atual = 0  # para finalizar o jogo quando chegar no numero de linhas
 numero_linhas_arquivo = 0
 linha_arquivo = arquivo_algoritmos.readline()
@@ -89,8 +112,6 @@ while linha_arquivo:
     linha_arquivo = arquivo_algoritmos.readline()
 
 arquivo_algoritmos.seek(0)  # retorna para a primeira linha do arquivo
-
-arquivo_algoritmos.readline()  # ignora a primeira linha, que é o nome do algoritmo
 linha_arquivo_atual = ''
 fila = fila.Fila()
 
@@ -101,15 +122,13 @@ indice_caractere_atual = 0
 active = False
 
 # Mensagens
-# msg_cafe = f"Tomar Café"
-msg_barra_energia = f"Barra de Energia"
-msg_barra_conc = f"Barra de Concentração"
-msg_algoritmo = f'Algoritmo'
+titulos_algoritmos = ['Numero primo', 'PA', 'Sacar no Banco']
+codigo_indice = -1
+msg_algoritmo = f'Algoritmo {codigo_indice + 1}: {titulos_algoritmos[codigo_indice]}'
 
 while True:
     # Definicao do framerate do jogo
     clk.tick(25)
-    # tela.blit(img_1, (0, 0))  # Definicao do fundo do jogo
     tela.fill(BLACK)
 
     # Controle das cores dinamicas
@@ -128,6 +147,11 @@ while True:
         indice_caractere_atual = 0
         linha_arquivo_atual = arquivo_algoritmos.readline()
         linha_arquivo_atual = linha_arquivo_atual[:-1]
+        # Condição de troca de algoritmo
+        if linha_arquivo_atual == '#':
+            linha_arquivo_atual = arquivo_algoritmos.readline()
+            linha_arquivo_atual = linha_arquivo_atual[:-1]
+            codigo_indice += 1
         linha_arquivo_atual = linha_arquivo_atual.strip()
         for caractere in linha_arquivo_atual:
             fila.insere(caractere)
@@ -158,9 +182,9 @@ while True:
     # botao = pygame.draw.rect(tela, (red_botao, green_botao, 0), (x_pos_botao, y_pos_botao, 100, 100))
     # Textos:
     tela_textos = pygame.draw.rect(tela, (51, 153, 255), (x_pos_caixa, y_pos_caixa, x_tam_caixa, y_tam_caixa))
-    input_texto_box = pygame.draw.rect(tela, cor_input_box, (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 30))
+    input_texto_box = pygame.draw.rect(tela, cor_input_box, (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 35))
     input_texto_contorno = pygame.draw.rect(tela, BLACK,
-                                            (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 30), 3)
+                                            (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 35), 3)
 
     # Mostra a sentença algorítica a ser digitada (em branco) -> fica por baixo dos caracteres verdes (corretos)
     linha_arquivo_renderizar = fonte_2.render(linha_arquivo_atual, False, WHITE)
@@ -175,24 +199,38 @@ while True:
     tela.blit(msg_format_texto_base, (x_pos_caixa + 68, y_pos_caixa + 80))
 
     # Formatando textos
-    # msg_format_cafe = fonte_1.render(msg_cafe, False, WHITE)
-    msg_format_energia = fonte_1.render(msg_barra_energia, False, WHITE)
-    msg_format_conc = fonte_1.render(msg_barra_conc, False, WHITE)
+    msg_algoritmo = f'Algoritmo {codigo_indice + 1}: {titulos_algoritmos[codigo_indice]}'
     msg_format_algoritmo = fonte_1.render(msg_algoritmo, False, WHITE)
     msg_format_input_text = fonte_2.render(input_text, False, BLACK)
     largura_input_texto = msg_format_input_text.get_width()
 
     # Colocando textos na tela
-    # tela.blit(msg_format_cafe, (200, 20))
-    tela.blit(msg_format_energia, (105, 645))
-    tela.blit(msg_format_conc, (105, 570))
-    tela.blit(msg_format_algoritmo, (x_pos_caixa + 175, y_pos_caixa + 20))
-    tela.blit(msg_format_input_text, (x_pos_caixa + 40, y_pos_caixa + 135))
+    tela.blit(tela, deslocamento)  # Atualiza a tela com um screen shake quando o player erra
+    tela.blit(msg_format_algoritmo, (x_pos_caixa + (x_tam_caixa/2) - msg_format_algoritmo.get_width()/2,
+                                     y_pos_caixa + 20))
+    tela.blit(msg_format_input_text, (x_pos_caixa + 40, y_pos_caixa + 140))
 
+    # Colocando imagens na tela
+    grupo_sprites_permanentes.draw(tela)
 
     # Controle da decrementacao das barras
-    largura_barra_energia -= 0.4  # valor estava em 1 (retornar)
-    # largura_barra_concentracao -= 0.2
+    largura_barra_energia -= 0.4
+
+    # Animando a xicara de café quando a energia está baixa
+    if largura_barra_energia <= 400:
+        xicara_cafe.image.set_alpha(abs(sin(valor_seno_alfa_xicara) * 255))  # animando a xícara
+        valor_seno_alfa_xicara += 0.09
+    else:
+        xicara_cafe.image.set_alpha(255)
+
+    # Tremendo a tela quando o player erra um caractere:
+    if screen_shake > 0:
+        screen_shake -= 1
+    if screen_shake:
+        deslocamento[0] = randint(0, 8) - 4
+        deslocamento[1] = randint(0, 8) - 4
+    else:
+        deslocamento = [0, 0]
 
     # Eventos do jogo
     for event in pygame.event.get():
@@ -203,6 +241,11 @@ while True:
         # Deteccao de LEFT CLICK
         if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
+            # Recuperando energia ao clicar na xicara
+            if largura_barra_energia <= 400:
+                if xicara_cafe.rect.collidepoint(pos):
+                    largura_barra_energia += 350
+                    drinking_sound.play()
             # Se o usuário clicar na caixa de texto, ativá-la. Se clicar fora da caixa, desativá-la
             if input_texto_box.collidepoint(pos):
                 active = True
@@ -236,9 +279,10 @@ while True:
                         fila.remove()
                         indice_caractere_atual += 1
                     elif not_unicodes_especiais:
+                        screen_shake = 7
                         largura_barra_concentracao -= 40
-                        # largura_barra_energia -= 20
-                        teclando.play()
+                        #teclando.play()
+                        resposta_errada.play()
 
     # limpa a caixa de texto de input ao trocar de linha no arquivo
     if fila.vazia():
@@ -257,6 +301,4 @@ while True:
         pygame.quit()
         exit()
 
-    # Colocando imagens na tela
-    tela.blit(img_xicara_cafe, (x_pos_barra_energia - 15, y_pos_barra_energia))
     pygame.display.flip()

@@ -20,3 +20,11 @@ def vitoria():
 
 def contorno_rect():
     pass
+
+
+class FiguraClicavel(pygame.sprite.Sprite):
+    def __init__(self, meu_sprite, posicao):
+        super().__init__()
+        self.image = meu_sprite
+        self.posicao = posicao
+        self.rect = self.image.get_rect(center=self.posicao)
