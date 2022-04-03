@@ -12,6 +12,17 @@ from random import randint
 # altera o caminho do terminal para o caminho do arquivo
 import os
 
+# cores dos objetos
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+RED = (255, 50, 0)
+BLUE = (0, 50, 255)
+YELLOW = (255, 255, 0)
+ROXO = (153, 51, 153)
+
+COR_ALGORITMOS = [GREEN, YELLOW, ROXO]
+
 
 def coders_night():
     # inicializacao da library do pygame
@@ -37,17 +48,6 @@ def coders_night():
     x_pos_barra_conc = 100
     y_pos_barra_conc = 565
 
-    # cores dos objetos
-    WHITE = (255, 255, 255)
-    BLACK = (0, 0, 0)
-    GREEN = (0, 255, 0)
-    RED = (255, 50, 0)
-    BLUE = (0, 50, 255)
-    YELLOW = (255, 255, 0)
-    ROXO = (153, 51, 153)
-    # cor botao
-    red_botao = 255
-    green_botao = 0
     # cor barra_energia
     red_barra_energia = red_barra_concentracao = 0
     green_barra_energia = green_barra_concentracao = 255
@@ -66,10 +66,6 @@ def coders_night():
     resposta_errada.set_volume(0.3)
     som_acabou_o_tempo = pygame.mixer.Sound(os.path.join('Sons', 'som_acabou_o_tempo.mpeg'))
     som_acabou_o_tempo.set_volume(0.15)
-
-    # localizacao do botao na tela
-    x_pos_botao = 250
-    y_pos_botao = 80
 
     # caixa de texto
     x_tam_caixa = 500
@@ -128,7 +124,6 @@ def coders_night():
     arquivo_algoritmos.seek(0)  # retorna para a primeira linha do arquivo
     linha_arquivo_atual = ''
     minha_fila = fila.Fila()
-    COR_ALGORITMOS = [GREEN, YELLOW, ROXO]
     cor_algoritmo_atual = -1
 
     # Este indice é utilizado para saber a partição atual da 'string' que já foi acertada
@@ -141,10 +136,9 @@ def coders_night():
     # Mensagens
     codigo_indice = -1
     titulos_algoritmos = ['Numero primo', 'PA', 'Sacar no Banco']
-    msg_algoritmo = f'Algoritmo {codigo_indice + 1}: {titulos_algoritmos[codigo_indice]}'
 
     msg_progresso = f'Progresso'
-    x_pos_progresso = x_pos_caixa + x_tam_caixa/2
+    x_pos_progresso = x_pos_caixa + x_tam_caixa / 2
     y_pos_progresso = y_pos_caixa + y_tam_caixa - 95
 
     msg_input_placeholder = f'Digite aqui...'
@@ -154,21 +148,12 @@ def coders_night():
     # Timer para digitar o trecho de código
     delay_trecho_codigo = 20  # estava 15 (e tava dificil)
     timer_trecho_codigo = delay_trecho_codigo
-    msg_timer = f'Tempo: {timer_trecho_codigo:2.2f}'
-
+    
+    # Laço principal do jogo
     while True:
         # Definicao do framerate do jogo
         clk.tick(25)
         tela.fill(BLACK)
-
-        # Controle das cores dinamicas
-        # Botao cafe
-        if largura_barra_energia >= 400:
-            green_botao = 0
-            red_botao = 255
-        else:
-            green_botao = 255
-            red_botao = 0
 
         #  Lógica para troca de linhas no algoritmo
         if minha_fila.vazia():
@@ -188,17 +173,19 @@ def coders_night():
                 minha_fila.insere(caractere)
                 texto_base += caractere
 
-        # Desenhos
+        # Desenhando barras de energia e concentração
         # Barra de energia:
-        barra_energia = pygame.draw.rect(tela, (red_barra_energia, green_barra_energia, 0),
-                                         (x_pos_barra_energia, y_pos_barra_energia, largura_barra_energia, 40))
-        barra_energia_contorno = pygame.draw.rect(tela, WHITE, (x_pos_barra_energia - 2, y_pos_barra_energia - 2,
-                                                                largura_barra_energia + 2, 42), 3)
+        pygame.draw.rect(tela, (red_barra_energia, green_barra_energia, 0), (x_pos_barra_energia, y_pos_barra_energia,
+                                                                             largura_barra_energia, 40))
+        # Contorno da barra de energia
+        pygame.draw.rect(tela, WHITE, (x_pos_barra_energia - 2, y_pos_barra_energia - 2,
+                                       largura_barra_energia + 2, 42), 3)
         # Barra de concentracao:
-        barra_conc = pygame.draw.rect(tela, (red_barra_concentracao, green_barra_concentracao, 0),
-                                      (x_pos_barra_conc, y_pos_barra_conc, largura_barra_concentracao, 40))
-        barra_concentracao_contorno = pygame.draw.rect(tela, WHITE, (x_pos_barra_conc - 2, y_pos_barra_conc - 2,
-                                                                     largura_barra_concentracao + 2, 42), 3)
+        pygame.draw.rect(tela, (red_barra_concentracao, green_barra_concentracao, 0),
+                         (x_pos_barra_conc, y_pos_barra_conc, largura_barra_concentracao, 40))
+        # Contorno da barra de concentração
+        pygame.draw.rect(tela, WHITE, (x_pos_barra_conc - 2, y_pos_barra_conc - 2,
+                                       largura_barra_concentracao + 2, 42), 3)
 
         # Porcentagem para controlar a cor das barras (energia e concentração)
         barra_energia_porcentagem = largura_barra_energia / largura_max
@@ -209,24 +196,26 @@ def coders_night():
         red_barra_concentracao = (1 - barra_concentracao_porcentagem) * 255 % 256
         green_barra_concentracao = barra_concentracao_porcentagem * 255 % 256
 
-        # Textos:
-        tela_textos = pygame.draw.rect(tela, (51, 153, 255), (x_pos_caixa, y_pos_caixa, x_tam_caixa, y_tam_caixa))
-        tela_textos_contorno = pygame.draw.rect(tela, COR_ALGORITMOS[cor_algoritmo_atual],
-                                                (x_pos_caixa - 2, y_pos_caixa - 2,
-                                                 x_tam_caixa + 2, y_tam_caixa + 2), 5)
-        input_texto_box = pygame.draw.rect(tela, cor_input_box, (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 35))
-        input_texto_contorno = pygame.draw.rect(tela, BLACK,
-                                                (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 35), 3)
+        # Desenhando retângulos dos textos:
+        # Retângulo principal (tela central)
+        pygame.draw.rect(tela, (51, 153, 255), (x_pos_caixa, y_pos_caixa, x_tam_caixa, y_tam_caixa))
+        # Contorno do retângulo da tela central
+        pygame.draw.rect(tela, COR_ALGORITMOS[cor_algoritmo_atual], (x_pos_caixa - 2, y_pos_caixa - 2,
+                                                                     x_tam_caixa + 2, y_tam_caixa + 2), 5)
+        # Retângulo da input box (é atribuído a uma variável para verificar a colisão)
+        input_texto_box = pygame.draw.rect(tela, cor_input_box, (x_pos_caixa + 30, y_pos_caixa + 135,
+                                                                 x_tam_caixa - 60, 35))
+        # Contorno do retângulo da input box
+        pygame.draw.rect(tela, BLACK, (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 35), 3)
 
-        # Barra de porcentagem concluída do algoritmo atual
-        barra_progresso_algoritmo_fundo = pygame.draw.rect(tela, WHITE, (x_pos_caixa + 40, y_pos_caixa + y_tam_caixa - 55,
-                                                                         x_tam_caixa - 80, 35))
-        barra_progresso_algoritmo_real = pygame.draw.rect(tela, GREEN, (x_pos_caixa + 40, y_pos_caixa + y_tam_caixa - 55,
-                                                                        (indice_linha_atual - 1)/numero_linhas_arquivo *
-                                                                        (x_tam_caixa - 80), 35))
-        barra_progresso_algoritmo_contorno = pygame.draw.rect(tela, BLACK,
-                                                              (x_pos_caixa + 38, y_pos_caixa + y_tam_caixa - 57,
-                                                               x_tam_caixa - 78, 37), 3)
+        # Barra de porcentagem concluída do jogo
+        # Retângulo de fundo do progresso (branco)
+        pygame.draw.rect(tela, WHITE, (x_pos_caixa + 40, y_pos_caixa + y_tam_caixa - 55, x_tam_caixa - 80, 35))
+        # Retângulo do progresso verde (barra verde por cima da cor branca de fundo, com base na % de linhas feitas)
+        pygame.draw.rect(tela, GREEN, (x_pos_caixa + 40, y_pos_caixa + y_tam_caixa - 55,
+                                       (indice_linha_atual - 1) / numero_linhas_arquivo * (x_tam_caixa - 80), 35))
+        # Retângulo de contorno do retângulo de progresso do jogo
+        pygame.draw.rect(tela, BLACK, (x_pos_caixa + 38, y_pos_caixa + y_tam_caixa - 57, x_tam_caixa - 78, 37), 3)
 
         # Mostra a sentença algorítica a ser digitada (em branco) -> fica por baixo dos caracteres verdes (corretos)
         linha_arquivo_renderizar = fonte_2.render(linha_arquivo_atual, False, WHITE)
@@ -255,7 +244,7 @@ def coders_night():
         msg_format_texto_timer_perigo = fonte_timer.render(msg_timer[7:], False, cor_timer_perigo)
 
         # Colocando textos na tela
-        tela.blit(msg_format_progresso, (x_pos_progresso - msg_format_progresso.get_width()/2, y_pos_progresso))
+        tela.blit(msg_format_progresso, (x_pos_progresso - msg_format_progresso.get_width() / 2, y_pos_progresso))
         tela.blit(msg_format_texto_timer_safe, (50, 50))
         tela.blit(msg_format_texto_timer_perigo, (150, 50))
         tela.blit(msg_format_texto_base, (x_pos_caixa + 68, y_pos_caixa + 80))
@@ -296,8 +285,9 @@ def coders_night():
 
         # Criando o cursor se a input box está ativa (e de acordo com o timer do cursor pra ele piscar)
         if active and timer_cursor > 0:
-            cursor = pygame.draw.rect(tela, BLACK, (x_pos_caixa + 30 + msg_format_input_text.get_width() + 10,
-                                                    y_pos_caixa + 140, 3, msg_format_input_text.get_height()))
+            # Desenha o cursor quando a input box está ativa e a cada intervalo de tempo definido pelo timer
+            pygame.draw.rect(tela, BLACK, (x_pos_caixa + 30 + msg_format_input_text.get_width() + 10,
+                                           y_pos_caixa + 140, 3, msg_format_input_text.get_height()))
         # Controle da decrementacao das barras
         largura_barra_energia -= 0.4
 
@@ -326,7 +316,7 @@ def coders_night():
             # Verificando o pressionar das teclas
             if event.type == pygame.KEYDOWN:
                 if active:
-                    #if event.key == pygame.K_BACKSPACE:
+                    # if event.key == pygame.K_BACKSPACE:
                     #    input_text = input_text[:-1]
                     # Se a fila estiver vazia, o jogador venceu o jogo
                     if not minha_fila.vazia() and largura_input_texto < 415:
