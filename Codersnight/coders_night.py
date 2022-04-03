@@ -11,8 +11,9 @@ from math import sin
 from random import randint
 # altera o caminho do terminal para o caminho do arquivo
 import os
+
+
 def coders_night():
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     # inicializacao da library do pygame
     pygame.init()
     # pygame.key.set_repeat(300, 110)  # permite segurar uma tela (como apagar os caracteres com o backspace)
