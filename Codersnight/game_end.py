@@ -1,6 +1,6 @@
-import pygame
-from pygame.locals import *
-from sys import exit
+import pygame.event
+
+from coders_night import *
 
 
 def game_end(final):
@@ -18,13 +18,10 @@ def vitoria():
     pass
 
 
-def contorno_rect():
-    pass
-
-
 class FiguraClicavel(pygame.sprite.Sprite):
     def __init__(self, meu_sprite, posicao):
         super().__init__()
         self.image = meu_sprite
         self.posicao = posicao
         self.rect = self.image.get_rect(center=self.posicao)
+
