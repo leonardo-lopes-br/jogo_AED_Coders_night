@@ -1,5 +1,3 @@
-import pygame.event
-
 from coders_night import *
 
 
@@ -24,4 +22,16 @@ class FiguraClicavel(pygame.sprite.Sprite):
         self.image = meu_sprite
         self.posicao = posicao
         self.rect = self.image.get_rect(center=self.posicao)
+
+
+def configura_cor_botao(ativo):
+    if ativo:
+        cor_botao = (80, 200, 255)
+        cor_texto = WHITE
+    else:
+        cor_botao = (210, 210, 210)
+        cor_texto = BLACK
+    return cor_botao, cor_texto
+
+
 

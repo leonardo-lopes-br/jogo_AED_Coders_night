@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 # importacao do pygame
 import pygame
 from pygame.locals import *
 from sys import exit
+
+from pygame.time import Clock
+
 import fila
 import game_end
 from math import sin
@@ -34,6 +34,16 @@ def coders_night():
     largura_janela = 1280
     altura_janela = 720
 
+    # Pegando as dimensoes do monitor do usuario
+    # ARRUMAR DEPOIS -> SE A TELA FOR PEQUENA, O JOGO NÃO VAI MOSTRAR TODAS AS INFO
+    monitor = pygame.display.Info()
+    if monitor.current_w < 1280:
+        largura_janela = 960
+        altura_janela = 540
+
+    # Variável para controlar o fullscreen
+    fullscreen = False
+
     # tela_principal do jogo
     tela_principal = pygame.display.set_mode((largura_janela, altura_janela))
     pygame.display.set_caption("Coder's Night")
@@ -46,7 +56,7 @@ def coders_night():
     resposta_errada = pygame.mixer.Sound(os.path.join('Sons', 'resposta_errada.mp3'))
     resposta_errada.set_volume(0.3)
     som_acabou_o_tempo = pygame.mixer.Sound(os.path.join('Sons', 'som_acabou_o_tempo.mpeg'))
-    som_acabou_o_tempo.set_volume(0.15)
+    som_acabou_o_tempo.set_volume(0.09)
 
     # definicao das fontes dos textos
     fonte_1 = pygame.font.SysFont('arial', 27, True, False)
@@ -54,34 +64,11 @@ def coders_night():
     fonte_timer = pygame.font.SysFont('Rubik Wet Paint', 35, False, True)
     fonte_titulo_jogo = pygame.font.SysFont('Rubik Glitch', 80, True, True)
 
-    # imagens
-    img_xicara_cafe = pygame.image.load(os.path.join('Imagens', 'xicara.png')).convert_alpha()
-    img_xicara_cafe = pygame.transform.scale(img_xicara_cafe, (55, 55))
-
-    img_cerebro = pygame.image.load(os.path.join('Imagens', 'brain.png')).convert_alpha()
-    img_cerebro = pygame.transform.scale(img_cerebro, (55, 55))
-
-    # criando os objetos
-    xicara_cafe = game_end.FiguraClicavel(img_xicara_cafe, (50, 655))
-    cerebro = game_end.FiguraClicavel(img_cerebro, (50, 580))
-
     # Grupo para os sprites
     grupo_sprites_permanentes = pygame.sprite.Group()
-    grupo_sprites_permanentes.add(xicara_cafe, cerebro)
 
     # clock
-    clk = pygame.time.Clock()
-
-    # dimensoes das barras
-    largura_max = 1000
-    largura_barra_energia = largura_max
-    largura_barra_concentracao = largura_max
-
-    x_pos_barra_energia = 100
-    y_pos_barra_energia = 640
-
-    x_pos_barra_conc = 100
-    y_pos_barra_conc = 565
+    clk: Clock = pygame.time.Clock()
 
     # cor barra_energia
     red_barra_energia = red_barra_concentracao = 0
@@ -92,6 +79,7 @@ def coders_night():
     y_tam_caixa = 300
     x_pos_caixa = largura_janela / 2 - x_tam_caixa / 2
     y_pos_caixa = altura_janela / 2 - y_tam_caixa / 2
+
 
     # Animação da xícara de café
     valor_seno_alfa_xicara = 1.57  # para animar a xicara (ficar piscando com energia baixa)
@@ -104,6 +92,11 @@ def coders_night():
     msg_input_placeholder = 'Digite aqui...'
     msg_botao_iniciar = 'Jogar'
     msg_nome_jogo = "Coder's Night"
+    msg_botao_dificuldade = 'Dificuldade'
+    msg_dificuldades = ['Fácil', 'Médio', 'Difícil']
+    msg_botao_opcoes = 'Opções'
+    msg_opcoes = ['Tela cheia']
+    msg_botao_sair = 'Sair'
 
     # Posição fixa do texto 'Progresso'
     x_pos_progresso = x_pos_caixa + x_tam_caixa / 2
@@ -122,6 +115,7 @@ def coders_night():
     while True:
 
         # region Configurando tudo como o padrão inicial
+
         # Variaveis para tremer a tela_principal_principal com um erro do usuário
         screen_shake = 0
         deslocamento = [0, 0]
@@ -168,9 +162,6 @@ def coders_night():
         delay_trecho_codigo = 20  # estava 15 (e tava dificil)
         timer_trecho_codigo = delay_trecho_codigo
 
-        # Cor dos botoes e textos
-        cor_botao = (210, 210, 210)
-        cor_texto_botao = BLACK
         # endregion
 
         if tela_menu_inicial:
@@ -178,30 +169,81 @@ def coders_night():
             pygame.mixer.music.set_volume(0.4)
             pygame.mixer.music.play(-1)
 
+        botao_iniciar_ativo = False
+        botao_dificuldade_ativo = False
+        botao_opcoes_ativo = False
+        botao_sair_ativo = False
+
+        mostrar_dificuldades = False
+        mostrar_opcoes = False
+
+        area_dificuldades = pygame.draw.rect(tela_principal, WHITE, (20, 20, 40, 40), 40)
+        area_opcoes = pygame.draw.rect(tela_principal, WHITE, (20, 20, 40, 40), 40)
+
         while tela_menu_inicial:
+            tela_principal.fill(BLACK)
+            # Configura a cor dos botões do menu
+            cor_botao_iniciar, cor_texto_botao_iniciar = game_end.configura_cor_botao(botao_iniciar_ativo)
+            cor_botao_dificuldade, cor_texto_botao_dificuldade = game_end.configura_cor_botao(botao_dificuldade_ativo)
+            cor_botao_sair, cor_texto_botao_sair = game_end.configura_cor_botao(botao_sair_ativo)
+            cor_botao_opcoes, cor_texto_botao_opcoes = game_end.configura_cor_botao(botao_opcoes_ativo)
 
             # region Trabalhando o menu inicial do jogo
             # Retângulo principal com as opções
             pygame.draw.rect(tela_principal, (60, 60, 200),
-                             (largura_janela / 2 - 200, altura_janela / 2 - 100, 400, 400), 200)
+                             (largura_janela / 2 - 200, altura_janela / 2 - 200, 400, 500), 200)
             # Contorno do retangulo principal com as opções
             pygame.draw.rect(tela_principal, WHITE, (largura_janela / 2 - 202,
-                                                     altura_janela / 2 - 102, 402, 402), 4)
-            # Botão iniciar
-            botao_iniciar = pygame.draw.rect(tela_principal, cor_botao,
-                                             (largura_janela / 2 - 100, altura_janela / 2 - 65, 200, 80), 100)
+                                                     altura_janela / 2 - 202, 402, 502), 4)
+            # Botão iniciar o jogo
+            botao_iniciar = pygame.draw.rect(tela_principal, cor_botao_iniciar,
+                                             (largura_janela / 2 - 100, altura_janela / 2 - 150, 200, 80), 100)
             # Contorno do botão iniciar
             pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 102,
-                                                     altura_janela / 2 - 67, 202, 82), 3)
+                                                     altura_janela / 2 - 152, 202, 82), 3)
+
+            # Botão escolher dificuldade do jogo
+            botao_dificuldade = pygame.draw.rect(tela_principal, cor_botao_dificuldade,
+                                                 (largura_janela / 2 - 100, altura_janela / 2 - 45, 200, 80), 100)
+            # Contorno do botao de dificuldade
+            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 102, altura_janela / 2 - 47, 202, 82), 3)
+
+            # Botão de opções
+            botao_opcoes = pygame.draw.rect(tela_principal, cor_botao_opcoes,
+                                            (largura_janela / 2 - 100, altura_janela / 2 + 60, 200, 80), 100)
+            # Contorno do botao de opções do jogo
+            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 102, altura_janela / 2 + 58, 202, 82), 3)
+
+            # Botão sair do jogo
+            botao_sair = pygame.draw.rect(tela_principal, cor_botao_sair,
+                                          (largura_janela / 2 - 100, altura_janela / 2 + 165, 200, 80), 100)
+            # Contorno do botão de sair do jogo
+            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 102, altura_janela / 2 + 163, 202, 82), 3)
 
             # Textos
-            msg_format_botao_iniciar = fonte_1.render(msg_botao_iniciar, False, cor_texto_botao)
             msg_format_nome_jogo = fonte_titulo_jogo.render(msg_nome_jogo, True, WHITE)
+            msg_format_botao_iniciar = fonte_1.render(msg_botao_iniciar, True, cor_texto_botao_iniciar)
+            msg_format_botao_dificuldade = fonte_1.render(msg_botao_dificuldade, True, cor_texto_botao_dificuldade)
+            msg_format_botao_opcoes = fonte_1.render(msg_botao_opcoes, True, cor_texto_botao_opcoes)
+            msg_format_botao_sair = fonte_1.render(msg_botao_sair, True, cor_texto_botao_sair)
 
             # Colocando os textos na tela
-            tela_principal.blit(msg_format_botao_iniciar, (largura_janela / 2 - 39, altura_janela / 2 - 45,
-                                                           185, 80))
-            tela_principal.blit(msg_format_nome_jogo, (largura_janela / 2 - 220, 85))
+            tela_principal.blit(msg_format_nome_jogo, (largura_janela / 2 - 220, 70))
+            tela_principal.blit(msg_format_botao_iniciar, (largura_janela / 2 - 39, altura_janela / 2 - 130, 185, 80))
+            tela_principal.blit(msg_format_botao_dificuldade,
+                                (largura_janela / 2 - 78, altura_janela / 2 - 22, 200, 80))
+            tela_principal.blit(msg_format_botao_opcoes, (largura_janela / 2 - 55, altura_janela / 2 + 82, 200, 80))
+            tela_principal.blit(msg_format_botao_sair, (largura_janela / 2 - 30, altura_janela / 2 + 187, 200, 80))
+
+            if mostrar_dificuldades:
+                #  Desenhando o retângulo principal com as dificuldades do jogo
+                area_dificuldades = pygame.draw.rect(tela_principal, WHITE, (largura_janela / 2 - 100,
+                                                                             altura_janela / 2 + 20, 200, 200), 200)
+            if mostrar_opcoes:
+                # Desenhando o retângulo principal com as opções do jogo
+                area_opcoes = pygame.draw.rect(tela_principal, WHITE,
+                                               (largura_janela / 2 - 100, altura_janela / 2 + 140,
+                                                200, 200), 200)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -209,20 +251,87 @@ def coders_night():
                     exit()
                 posicao_mouse = pygame.mouse.get_pos()
                 if botao_iniciar.collidepoint(posicao_mouse):
-                    cor_botao = (80, 200, 255)
-                    cor_texto_botao = WHITE
+                    botao_iniciar_ativo = True
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         tela_menu_inicial = False
-                        pygame.mixer.music.load(os.path.join('Sons', "musiquinha_fundo.flac"))
+                        pygame.mixer.music.load(os.path.join('Sons', "musica_lofi.mp3"))
                         pygame.mixer.music.set_volume(0.4)
                         pygame.mixer.music.play(-1)
                 else:
-                    cor_botao = (210, 210, 210)
-                    cor_texto_botao = BLACK
+                    botao_iniciar_ativo = False
+                if botao_dificuldade.collidepoint(posicao_mouse):
+                    botao_dificuldade_ativo = True
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        mostrar_dificuldades = not mostrar_dificuldades
+                else:
+                    botao_dificuldade_ativo = False
+                if botao_sair.collidepoint(posicao_mouse):
+                    botao_sair_ativo = True
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        pygame.quit()
+                        exit()
+                else:
+                    botao_sair_ativo = False
+                if botao_opcoes.collidepoint(posicao_mouse):
+                    botao_opcoes_ativo = True
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        mostrar_opcoes = not mostrar_opcoes
+                else:
+                    botao_opcoes_ativo = False
+                # Se o usuário clicar em um lugar da tela que não seja o menu habilitado, este menu fecha
+                if event.type == MOUSEBUTTONDOWN:
+                    if mostrar_opcoes and not area_opcoes.collidepoint(posicao_mouse):
+                        mostrar_opcoes = False
+                    if mostrar_dificuldades and not area_opcoes.collidepoint(posicao_mouse):
+                        mostrar_dificuldades = False
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        fullscreen = True
+                        pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+                    elif event.key == pygame.K_DOWN:
+                        pygame.display.set_mode((largura_janela, altura_janela))
 
             pygame.display.flip()
-            pass
             # endregion
+
+        # region Configurando sempre a dimensão pois é possível que o usuário tenha habilitado fullscreen
+        # Configurando as dimensões das coisas com base na largura e altura da tela (necessário caso o
+        # usuário tenha colocado em fullscreen no menu inicial, por exemplo)
+        monitor = pygame.display.Info()
+        largura_janela = monitor.current_w
+        altura_janela = monitor.current_h
+
+        # dimensoes das barras de concentração e energia
+        largura_max = largura_janela * 0.84375
+        largura_barra_energia = largura_max
+        largura_barra_concentracao = largura_max
+
+        x_pos_barra_energia = largura_janela * 0.078125
+        y_pos_barra_energia = altura_janela * 0.8888888888888
+
+        x_pos_barra_conc = x_pos_barra_energia
+        y_pos_barra_conc = altura_janela * 0.78472222222
+
+        # imagens
+        largura_xicara = altura_xicara = largura_janela * 0.04296875
+        img_xicara_cafe = pygame.image.load(os.path.join('Imagens', 'xicara.png')).convert_alpha()
+        img_xicara_cafe = pygame.transform.scale(img_xicara_cafe, (largura_xicara, altura_xicara))
+
+        largura_cerebro = altura_cerebro = largura_janela * 0.04296875
+        img_cerebro = pygame.image.load(os.path.join('Imagens', 'brain.png')).convert_alpha()
+        img_cerebro = pygame.transform.scale(img_cerebro, (largura_cerebro, altura_cerebro))
+
+        # criando os objetos
+        x_pos_xicara = largura_xicara - (0.1 * largura_xicara)
+        x_pos_cerebro = largura_cerebro - (0.1 * largura_cerebro)
+        y_pos_xicara = altura_janela * 0.90972222222
+        y_pos_cerebro = altura_janela * 0.80555555555
+        xicara_cafe = game_end.FiguraClicavel(img_xicara_cafe, (x_pos_xicara, y_pos_xicara))
+        cerebro = game_end.FiguraClicavel(img_cerebro, (x_pos_cerebro, y_pos_cerebro))
+
+        grupo_sprites_permanentes.add(xicara_cafe, cerebro)
+        #endregion
 
         # Trabalhando na tela do menu final
         while tela_menu_final:
