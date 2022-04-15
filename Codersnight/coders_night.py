@@ -74,13 +74,6 @@ def coders_night():
     red_barra_energia = red_barra_concentracao = 0
     green_barra_energia = green_barra_concentracao = 255
 
-    # caixa de texto
-    x_tam_caixa = 500
-    y_tam_caixa = 300
-    x_pos_caixa = largura_janela / 2 - x_tam_caixa / 2
-    y_pos_caixa = altura_janela / 2 - y_tam_caixa / 2
-
-
     # Animação da xícara de café
     valor_seno_alfa_xicara = 1.57  # para animar a xicara (ficar piscando com energia baixa)
 
@@ -98,13 +91,6 @@ def coders_night():
     msg_opcoes = ['Tela cheia']
     msg_botao_sair = 'Sair'
 
-    # Posição fixa do texto 'Progresso'
-    x_pos_progresso = x_pos_caixa + x_tam_caixa / 2
-    y_pos_progresso = y_pos_caixa + y_tam_caixa - 95
-    # Posição fixa do texto 'Digite aqui...'
-    x_pos_placeholder = x_pos_caixa + 40
-    y_pos_placeholder = y_pos_caixa + 140
-
     # endregion
 
     tela_menu_inicial = True
@@ -116,13 +102,13 @@ def coders_night():
 
         # region Configurando tudo como o padrão inicial
 
-        # Variaveis para tremer a tela_principal_principal com um erro do usuário
+        # Variaveis para tremer a tela_principal com um erro do usuário
         screen_shake = 0
         deslocamento = [0, 0]
 
         # variáveis de input e texto base a ser digitado
         input_text = ''
-        cor_input_box = (180, 180, 180)  # começa com um tom cinza quando está selecionado
+        cor_input_box = (180, 180, 180)  # começa com um tom cinza quando não está selecionado
         texto_base = ''
 
         # region Cria uma fila e a preenche com caracteres do arquivo de algoritmos
@@ -146,7 +132,7 @@ def coders_night():
         # endregion
 
         # Controla a cor do algoritmo atual (trecho e borda da caixa)
-        cor_algoritmo_atual = -1
+        cor_algoritmo_atual = -1  # TALVEZ TIRAR ISSO DEPOIS (COM O DESENHO DO KASAI)
 
         # Este indice é utilizado para saber a partição atual da 'string' que já foi acertada
         indice_caractere_atual = 0
@@ -191,7 +177,8 @@ def coders_night():
             # region Trabalhando o menu inicial do jogo
             # Retângulo principal com as opções
             pygame.draw.rect(tela_principal, (60, 60, 200),
-                             (largura_janela / 2 - 200, altura_janela / 2 - 200, 400, 500), 200)
+                             (largura_janela / 2 - (largura_janela * 0.15625),
+                              altura_janela / 2 - (largura_janela * 0.15625), 400, 500), 200)
             # Contorno do retangulo principal com as opções
             pygame.draw.rect(tela_principal, WHITE, (largura_janela / 2 - 202,
                                                      altura_janela / 2 - 202, 402, 502), 4)
@@ -313,6 +300,25 @@ def coders_night():
         x_pos_barra_conc = x_pos_barra_energia
         y_pos_barra_conc = altura_janela * 0.78472222222
 
+        # caixa de texto
+        x_tam_caixa_principal = largura_janela * 0.390625  # era 500
+        y_tam_caixa_principal = altura_janela * 0.416666666  # era 300
+        x_pos_caixa_principal = largura_janela / 2 - x_tam_caixa_principal / 2
+        y_pos_caixa_principal = altura_janela / 2 - y_tam_caixa_principal / 2
+
+        # Posição fixa do texto 'Progresso'
+        x_pos_progresso = x_pos_caixa_principal + x_tam_caixa_principal / 2
+        y_pos_progresso = y_pos_caixa_principal + y_tam_caixa_principal - (0.31666666 * y_tam_caixa_principal)
+
+        x_pos_input_box = x_pos_caixa_principal + (x_tam_caixa_principal * 0.06)
+        y_pos_input_box = y_pos_caixa_principal + (y_tam_caixa_principal * 0.45)
+        x_tam_input_box = x_tam_caixa_principal * 0.88
+        y_tam_input_box = y_tam_caixa_principal * 0.116666666666
+
+        # Posição fixa do texto 'Digite aqui...'
+        x_pos_placeholder = x_pos_input_box + (x_tam_input_box * 0.034090909090909)
+        y_pos_placeholder = y_pos_input_box + (y_tam_input_box * 0.15)
+
         # imagens
         largura_xicara = altura_xicara = largura_janela * 0.04296875
         img_xicara_cafe = pygame.image.load(os.path.join('Imagens', 'xicara.png')).convert_alpha()
@@ -388,32 +394,39 @@ def coders_night():
 
             # Desenhando retângulos dos textos:
             # Retângulo principal (tela_principal central)
-            pygame.draw.rect(tela_principal, (51, 153, 255), (x_pos_caixa, y_pos_caixa, x_tam_caixa, y_tam_caixa))
+            pygame.draw.rect(tela_principal, (51, 153, 255), (x_pos_caixa_principal, y_pos_caixa_principal,
+                                                              x_tam_caixa_principal, y_tam_caixa_principal))
             # Contorno do retângulo da tela_principal central
-            pygame.draw.rect(tela_principal, COR_ALGORITMOS[cor_algoritmo_atual], (x_pos_caixa - 2, y_pos_caixa - 2,
-                                                                                   x_tam_caixa + 2, y_tam_caixa + 2), 5)
+            pygame.draw.rect(tela_principal, COR_ALGORITMOS[cor_algoritmo_atual],
+                             (x_pos_caixa_principal - 2, y_pos_caixa_principal - 2,
+                              x_tam_caixa_principal + 2, y_tam_caixa_principal + 2), 5)
             # Retângulo da input box (é atribuído a uma variável para verificar a colisão)
-            input_texto_box = pygame.draw.rect(tela_principal, cor_input_box, (x_pos_caixa + 30, y_pos_caixa + 135,
-                                                                               x_tam_caixa - 60, 35))
+            input_texto_box = pygame.draw.rect(tela_principal, cor_input_box,
+                                               (x_pos_input_box, y_pos_input_box, x_tam_input_box, y_tam_input_box))
             # Contorno do retângulo da input box
-            pygame.draw.rect(tela_principal, BLACK, (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 35), 3)
+            pygame.draw.rect(tela_principal, BLACK, (x_pos_caixa_principal + (x_tam_caixa_principal * 0.06),
+                                                     y_pos_caixa_principal + (y_tam_caixa_principal * 0.45),
+                                                     x_tam_caixa_principal - (x_tam_caixa_principal * 0.12),
+                                                     y_tam_caixa_principal * 0.11666666666666), 3)
 
             # Barra de porcentagem concluída do jogo
             # Retângulo de fundo do progresso (branco)
             pygame.draw.rect(tela_principal, WHITE,
-                             (x_pos_caixa + 40, y_pos_caixa + y_tam_caixa - 55, x_tam_caixa - 80, 35))
+                             (x_pos_caixa_principal + 40, y_pos_caixa_principal + y_tam_caixa_principal - 55,
+                              x_tam_caixa_principal - 80, 35))
             # Retângulo do progresso verde (barra verde por cima da cor branca de fundo, com base na % de linhas feitas)
-            pygame.draw.rect(tela_principal, GREEN, (x_pos_caixa + 40,
-                                                     y_pos_caixa + y_tam_caixa - 55,
+            pygame.draw.rect(tela_principal, GREEN, (x_pos_caixa_principal + 40,
+                                                     y_pos_caixa_principal + y_tam_caixa_principal - 55,
                                                      (indice_linha_atual - 1) / numero_linhas_arquivo *
-                                                     (x_tam_caixa - 80), 35))
+                                                     (x_tam_caixa_principal - 80), 35))
             # Retângulo de contorno do retângulo de progresso do jogo
             pygame.draw.rect(tela_principal, BLACK,
-                             (x_pos_caixa + 38, y_pos_caixa + y_tam_caixa - 57, x_tam_caixa - 78, 37), 3)
+                             (x_pos_caixa_principal + 38, y_pos_caixa_principal + y_tam_caixa_principal - 57,
+                              x_tam_caixa_principal - 78, 37), 3)
 
             # Mostra a sentença algorítica a ser digitada (em branco) -> fica por baixo dos caracteres verdes (corretos)
             linha_arquivo_renderizar = fonte_2.render(linha_arquivo_atual, False, WHITE)
-            tela_principal.blit(linha_arquivo_renderizar, (x_pos_caixa + 68, y_pos_caixa + 80))
+            tela_principal.blit(linha_arquivo_renderizar, (x_pos_caixa_principal + 68, y_pos_caixa_principal + 80))
 
             # Imprime a partição já correta do texto (a parte correta será de outra cor, por cima da branca original)
             texto = ''
@@ -442,13 +455,13 @@ def coders_night():
                                 (x_pos_progresso - msg_format_progresso.get_width() / 2, y_pos_progresso))
             tela_principal.blit(msg_format_texto_timer_safe, (50, 50))
             tela_principal.blit(msg_format_texto_timer_perigo, (150, 50))
-            tela_principal.blit(msg_format_texto_base, (x_pos_caixa + 68, y_pos_caixa + 80))
+            tela_principal.blit(msg_format_texto_base, (x_pos_caixa_principal + 68, y_pos_caixa_principal + 80))
             tela_principal.blit(tela_principal,
                                 deslocamento)  # Atualiza a tela_principal com um screen shake quando o player erra
             tela_principal.blit(msg_format_algoritmo,
-                                (x_pos_caixa + (x_tam_caixa / 2) - msg_format_algoritmo.get_width() / 2,
-                                 y_pos_caixa + 20))
-            tela_principal.blit(msg_format_input_text, (x_pos_caixa + 40, y_pos_caixa + 140))
+                                (x_pos_caixa_principal + (x_tam_caixa_principal / 2) - msg_format_algoritmo.get_width() / 2,
+                                 y_pos_caixa_principal + 20))
+            tela_principal.blit(msg_format_input_text, (x_pos_caixa_principal + 40, y_pos_caixa_principal + 140))
             # Só mostra o placeholder (Digite aqui...) quando a caixa de input não está ativa e não tem nada escrito
             if input_text == '' and not active:
                 tela_principal.blit(msg_format_placeholder, (x_pos_placeholder, y_pos_placeholder))
@@ -483,8 +496,8 @@ def coders_night():
             # Criando o cursor se a input box está ativa (e de acordo com o timer do cursor pra ele piscar)
             if active and timer_cursor > 0:
                 # Desenha o cursor quando a input box está ativa e a cada unidade de tempo determinada pelo timer
-                pygame.draw.rect(tela_principal, BLACK, (x_pos_caixa + 30 + msg_format_input_text.get_width() + 10,
-                                                         y_pos_caixa + 140, 3, msg_format_input_text.get_height()))
+                pygame.draw.rect(tela_principal, BLACK, (x_pos_caixa_principal + 30 + msg_format_input_text.get_width() + 10,
+                                                         y_pos_caixa_principal + 140, 3, msg_format_input_text.get_height()))
             # Controle da decrementacao das barras
             largura_barra_energia -= 0.4
 
