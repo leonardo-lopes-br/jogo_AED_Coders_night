@@ -34,4 +34,3 @@ def configura_cor_botao(ativo):
     return cor_botao, cor_texto
 
 
-

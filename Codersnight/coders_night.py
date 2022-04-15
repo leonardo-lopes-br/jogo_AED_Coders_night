@@ -1,4 +1,5 @@
 # importacao do pygame
+
 import pygame
 from pygame.locals import *
 from sys import exit
@@ -31,15 +32,18 @@ def coders_night():
     # pygame.key.set_repeat(300, 110)  # permite segurar uma tela_principal (como apagar os caracteres com o backspace)
 
     # dimensoes da janela do jogo
-    largura_janela = 1280
-    altura_janela = 720
+    largura_janela_padrao = 1280
+    altura_janela_padrao = 720
 
     # Pegando as dimensoes do monitor do usuario
     # ARRUMAR DEPOIS -> SE A TELA FOR PEQUENA, O JOGO NÃO VAI MOSTRAR TODAS AS INFO
     monitor = pygame.display.Info()
     if monitor.current_w < 1280:
-        largura_janela = 960
-        altura_janela = 540
+        largura_janela_padrao = 960
+        altura_janela_padrao = 540
+
+    largura_janela = largura_janela_padrao
+    altura_janela = altura_janela_padrao
 
     # Variável para controlar o fullscreen
     fullscreen = False
@@ -178,10 +182,12 @@ def coders_night():
             # Retângulo principal com as opções
             pygame.draw.rect(tela_principal, (60, 60, 200),
                              (largura_janela / 2 - (largura_janela * 0.15625),
-                              altura_janela / 2 - (largura_janela * 0.15625), 400, 500), 200)
+                              altura_janela / 2 - (largura_janela * 0.15625), largura_janela * 0.3125,
+                              altura_janela * 0.69444444444), round(largura_janela * 0.15625))
             # Contorno do retangulo principal com as opções
-            pygame.draw.rect(tela_principal, WHITE, (largura_janela / 2 - 202,
-                                                     altura_janela / 2 - 202, 402, 502), 4)
+            pygame.draw.rect(tela_principal, WHITE, (largura_janela / 2 - (largura_janela * 0.15625) + 2,
+                                                     altura_janela / 2 - (largura_janela * 0.15625) + 2,
+                                                     largura_janela * 0.3125 + 2, altura_janela * 0.694444444 + 2), 4)
             # Botão iniciar o jogo
             botao_iniciar = pygame.draw.rect(tela_principal, cor_botao_iniciar,
                                              (largura_janela / 2 - 100, altura_janela / 2 - 150, 200, 80), 100)
@@ -276,7 +282,13 @@ def coders_night():
                     if event.key == pygame.K_UP:
                         fullscreen = True
                         pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+                        # Recalculando dimensões da tela (caso usuário selecionou fullscreen)
+                        monitor = pygame.display.Info()
+                        largura_janela = monitor.current_w
+                        altura_janela = monitor.current_h
                     elif event.key == pygame.K_DOWN:
+                        largura_janela = largura_janela_padrao
+                        altura_janela = altura_janela_padrao
                         pygame.display.set_mode((largura_janela, altura_janela))
 
             pygame.display.flip()
@@ -337,7 +349,7 @@ def coders_night():
         cerebro = game_end.FiguraClicavel(img_cerebro, (x_pos_cerebro, y_pos_cerebro))
 
         grupo_sprites_permanentes.add(xicara_cafe, cerebro)
-        #endregion
+        # endregion
 
         # Trabalhando na tela do menu final
         while tela_menu_final:
@@ -459,7 +471,8 @@ def coders_night():
             tela_principal.blit(tela_principal,
                                 deslocamento)  # Atualiza a tela_principal com um screen shake quando o player erra
             tela_principal.blit(msg_format_algoritmo,
-                                (x_pos_caixa_principal + (x_tam_caixa_principal / 2) - msg_format_algoritmo.get_width() / 2,
+                                (x_pos_caixa_principal + (
+                                            x_tam_caixa_principal / 2) - msg_format_algoritmo.get_width() / 2,
                                  y_pos_caixa_principal + 20))
             tela_principal.blit(msg_format_input_text, (x_pos_caixa_principal + 40, y_pos_caixa_principal + 140))
             # Só mostra o placeholder (Digite aqui...) quando a caixa de input não está ativa e não tem nada escrito
@@ -496,8 +509,9 @@ def coders_night():
             # Criando o cursor se a input box está ativa (e de acordo com o timer do cursor pra ele piscar)
             if active and timer_cursor > 0:
                 # Desenha o cursor quando a input box está ativa e a cada unidade de tempo determinada pelo timer
-                pygame.draw.rect(tela_principal, BLACK, (x_pos_caixa_principal + 30 + msg_format_input_text.get_width() + 10,
-                                                         y_pos_caixa_principal + 140, 3, msg_format_input_text.get_height()))
+                pygame.draw.rect(tela_principal, BLACK,
+                                 (x_pos_caixa_principal + 30 + msg_format_input_text.get_width() + 10,
+                                  y_pos_caixa_principal + 140, 3, msg_format_input_text.get_height()))
             # Controle da decrementacao das barras
             largura_barra_energia -= 0.4
 
@@ -541,7 +555,7 @@ def coders_night():
                                                      event.key != pygame.K_RCTRL and event.key != pygame.K_LALT and \
                                                      event.key != pygame.K_RALT and event.key != pygame.K_UP and \
                                                      event.key != pygame.K_DOWN and event.key != pygame.K_LEFT and \
-                                                     event.key != pygame.K_RIGHT
+                                                     event.key != pygame.K_RIGHT and event.key != pygame.K_ESCAPE
                             # Se a fila não é vazia, verifica se a entrada do usuario é igual à primeira letra da fila
                             # e, se for, a remove e altera a cor da letra acertada para verde (atualiza o vetor de
                             # caracteres corretos)
