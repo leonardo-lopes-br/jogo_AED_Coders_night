@@ -63,20 +63,23 @@ def coders_night():
 
     img_cerebro = pygame.image.load(os.path.join('Imagens', 'brain.png')).convert_alpha()
     img_cerebro = pygame.transform.scale(img_cerebro, (45, 45))
+    img_shift = pygame.image.load(os.path.join("Imagens", "shift_branco.png"))
+    img_shift = pygame.transform.scale(img_shift, (100, 100))
 
 
     # criando os objetos
     posicao_xicara = (1040, 463)
-    tamanho_xicara = (32 * 6, 32 * 6)
     posicao_xicara_icone = (75, 650)
-    tamanho_xicara_icone = (32 * 2, 32 * 2)
     xicara = game_end.Xicara(tamanho=32*6, posicao_top_left=posicao_xicara)
     xicara_icone = game_end.Xicara(tamanho=32*2, posicao_top_left=posicao_xicara_icone)
+    shift_imagem = game_end.FiguraClicavel(img_shift, (1140, 430))
     cerebro = game_end.FiguraClicavel(img_cerebro, (80, 625))
 
     # Grupo para os sprites
     grupo_sprites_permanentes = pygame.sprite.Group()
+    grupo_sprites_temporarios = pygame.sprite.Group()
     grupo_sprites_permanentes.add(xicara_icone, cerebro, xicara)
+    grupo_sprites_temporarios.add(shift_imagem)
 
     # clock
     clk: Clock = pygame.time.Clock()
@@ -109,6 +112,7 @@ def coders_night():
 
     # Animação da xícara de café
     valor_seno_alfa_xicara = 1.57  # para animar a xicara (ficar piscando com energia baixa)
+    valor_seno_alfa_shft = 0
 
     # Títulos dos algoritmos
     titulos_algoritmos = ['Numero primo', 'PA', 'Sacar no Banco']
@@ -138,7 +142,6 @@ def coders_night():
     # Daqui pra cima, as declarações são fixas, pra baixo começa o loop que reseta as variáveis
     # laço do jogo inteiro (começa com a tela inicial e depois entra no laço principal do jogo)
     while True:
-
 
         # region Configurando tudo como o padrão inicial
         # Variaveis para tremer a tela_principal_principal com um erro do usuário
@@ -211,6 +214,18 @@ def coders_night():
         escolheu_dificil = False
 
         mostrar_dificuldades = False
+
+        # Limpando a tela
+        tela_principal.fill(BLACK)
+
+        # Trabalhando na tela do menu final
+        while tela_menu_final:
+            tela_principal.blit(fundo_jogo, (0, 0))
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        tela_menu_final = False
+                        tela_menu_inicial = True
 
         while tela_menu_inicial:
             tela_principal.blit(fundo_jogo, (0, 0))
@@ -371,12 +386,8 @@ def coders_night():
             delay_trecho_codigo = 15
             timer_trecho_codigo = delay_trecho_codigo
 
-        # Trabalhando na tela do menu final
-        while tela_menu_final:
-            pass
-
         # Laço principal do jogo
-        while True:
+        while not tela_menu_inicial and not tela_menu_final:
             # region Jogo de fato (toda a lógica)
             # Definicao do framerate do jogo
             clk.tick(30)
@@ -490,18 +501,23 @@ def coders_night():
             if input_text == '' and not active:
                 tela_principal.blit(msg_format_placeholder, (x_pos_placeholder, y_pos_placeholder))
 
-            # Colocando imagens na tela_principal (xicara e cerebro)
+            # Colocando imagens na tela_principal (xicaras e cerebro)
             grupo_sprites_permanentes.draw(tela_principal)
             grupo_sprites_permanentes.update()
 
             # Animando a xicara de café quando a energia está baixa
             if largura_barra_energia <= 400:
+                grupo_sprites_temporarios.draw(tela_principal)
+                grupo_sprites_temporarios.update()
                 xicara.flutuar(posicao_xicara)
                 xicara_icone.image.set_alpha(abs(sin(valor_seno_alfa_xicara) * 255))  # animando a xícara
                 xicara_icone.flutuar(posicao_xicara_icone)
+                shift_imagem.image.set_alpha(abs(sin(valor_seno_alfa_shft) * 255)) # animando o shift
                 valor_seno_alfa_xicara += 0.09
+                valor_seno_alfa_shft += 0.09
             else:
                 xicara_icone.image.set_alpha(255)
+                shift_imagem.image.set_alpha(255)
 
             # Tremendo a tela_principal quando o player erra um caractere:
             if screen_shake > 0:
@@ -593,8 +609,6 @@ def coders_night():
                                 largura_barra_concentracao -= 40
                                 resposta_errada.play()
 
-            print("Valor delay: ", delay_trecho_codigo)
-            print("Valor decremento: ", decremento_barra_energia)
             # limpa a caixa de texto de input ao trocar de linha no arquivo
             if minha_fila.vazia():
                 input_text = ''
@@ -611,15 +625,13 @@ def coders_night():
             if largura_barra_energia <= 0 or largura_barra_concentracao <= 0:
                 print("Voce perdeu!!!")
                 game_end.game_end('derrota')
-                pygame.quit()
-                exit()
+                tela_menu_final = True
 
             #  linhas que começam com hashtag separam os algoritmos
             if indice_linha_atual - numero_hashtags == numero_linhas_arquivo:
                 print("Voce ganhou!!")
                 game_end.game_end('vitoria')
-                pygame.quit()
-                exit()
+                tela_menu_final = True
 
             pygame.display.flip()
             # endregion
