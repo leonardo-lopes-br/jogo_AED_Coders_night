@@ -9,7 +9,7 @@ from sys import exit
 from pygame.time import Clock
 
 import fila
-import game_end
+import funcoes_classes_auxiliares
 from math import sin
 from random import randint
 # altera o caminho do terminal para o caminho do arquivo
@@ -52,6 +52,10 @@ def coders_night():
     resposta_errada.set_volume(0.3)
     som_acabou_o_tempo = pygame.mixer.Sound(os.path.join('Sons', 'som_acabou_o_tempo.mpeg'))
     som_acabou_o_tempo.set_volume(0.09)
+    som_jogador_perdeu = pygame.mixer.Sound(os.path.join('Sons', 'som_jogador_perdeu.wav'))
+    som_jogador_perdeu.set_volume(0.09)
+    som_jogador_ganhou = pygame.mixer.Sound(os.path.join('Sons', 'som_ganhou_jogo.wav'))
+    som_jogador_ganhou.set_volume(0.09)
 
     # definicao das fontes dos textos
     fonte_1 = pygame.font.SysFont('arial', 27, True, False)
@@ -66,14 +70,13 @@ def coders_night():
     img_shift = pygame.image.load(os.path.join("Imagens", "shift_branco.png"))
     img_shift = pygame.transform.scale(img_shift, (100, 100))
 
-
     # criando os objetos
     posicao_xicara = (1040, 463)
     posicao_xicara_icone = (75, 650)
-    xicara = game_end.Xicara(tamanho=32*6, posicao_top_left=posicao_xicara)
-    xicara_icone = game_end.Xicara(tamanho=32*2, posicao_top_left=posicao_xicara_icone)
-    shift_imagem = game_end.FiguraClicavel(img_shift, (1140, 430))
-    cerebro = game_end.FiguraClicavel(img_cerebro, (80, 625))
+    xicara = funcoes_classes_auxiliares.Xicara(tamanho=32 * 6, posicao_top_left=posicao_xicara)
+    xicara_icone = funcoes_classes_auxiliares.Xicara(tamanho=32 * 2, posicao_top_left=posicao_xicara_icone)
+    shift_imagem = funcoes_classes_auxiliares.FiguraClicavel(img_shift, (1140, 430))
+    cerebro = funcoes_classes_auxiliares.FiguraClicavel(img_cerebro, (80, 625))
 
     # Grupo para os sprites
     grupo_sprites_permanentes = pygame.sprite.Group()
@@ -100,10 +103,6 @@ def coders_night():
     x_pos_barra_conc = 100
     y_pos_barra_conc = 615
 
-    # cor barra_energia
-    red_barra_energia = red_barra_concentracao = 0
-    green_barra_energia = green_barra_concentracao = 255
-
     # caixa de texto
     x_tam_caixa = 575
     y_tam_caixa = 270
@@ -125,6 +124,20 @@ def coders_night():
     msg_botao_dificuldade = 'Dificuldade'
     msg_dificuldades = ['Fácil', 'Médio', 'Difícil']
     msg_botao_sair = 'Sair'
+    msg_botao_sairr = 'Sair do jogo'
+    msg_voltar_menu = 'Voltar ao menu'
+
+    msg_padrao_derrota = 'Você perdeu!'
+    msg_padrao_derrota2 = 'Mas está tudo bem, não se pode ganhar todas!'
+    msg_padrao_derrota3 = 'Que pena, está demitido!'
+
+    msg_derrota_energia = 'Você não tomou café para recuperar as energias!'
+    msg_derrota_concentracao = 'Você digitou muitos caracteres errados!'
+    
+    msg_vitoria1 = 'Parabéns! Você conseguiu programar tudo!'
+    msg_vitoria2 = 'Se manter a dedicação, talvez seja promovido!'
+    msg_vitoria3 = 'Talvez agora deva ir programar de verdade'
+    msg_vitoria4 = '.....'
 
     # Posição fixa do texto 'Progresso'
     x_pos_progresso = x_pos_caixa + x_tam_caixa / 2
@@ -139,6 +152,8 @@ def coders_night():
     tela_menu_inicial = True
     tela_menu_final = False
 
+    final_jogo = 'derrota'
+
     # Daqui pra cima, as declarações são fixas, pra baixo começa o loop que reseta as variáveis
     # laço do jogo inteiro (começa com a tela inicial e depois entra no laço principal do jogo)
     while True:
@@ -147,6 +162,11 @@ def coders_night():
         # Variaveis para tremer a tela_principal_principal com um erro do usuário
         screen_shake = 0
         deslocamento = [0, 0]
+
+        # Resetando as cores das barras
+        # cor barra_energia
+        red_barra_energia = red_barra_concentracao = 0
+        green_barra_energia = green_barra_concentracao = 255
 
         # variáveis de input e texto base a ser digitado
         input_text = ''
@@ -173,6 +193,15 @@ def coders_night():
         minha_fila = fila.Fila()
         # endregion
 
+        # Resetando as vidas apos recuperar o valor para analisar no fim do jogo
+        energia_final = largura_barra_energia
+        concentracao_final = largura_barra_concentracao
+        largura_barra_energia = largura_barra_concentracao = largura_max
+
+        # Resetando timer da msg de fim de jogo
+        delay_msg_final_jogo = 0.5
+        timer_msg_final_jogo = delay_msg_final_jogo
+
         # Controla a cor do algoritmo atual (trecho e borda da caixa)
         cor_algoritmo_atual = -1
 
@@ -191,23 +220,222 @@ def coders_night():
 
         # endregion
 
+        # Resetando a msg padrão de derrota
+        indice_msg_final_jogo = 0
+        msg_format_padrao_derrota1 = msg_format_padrao_derrota2 = msg_format_padrao_derrota3 = \
+            fonte_2.render(' ', True, BLACK)
+        msg_format_derrota_energia = msg_format_derrota_concentracao = msg_format_padrao_derrota1
+
+        imprimiu_msg_padrao_derrota1 = imprimiu_msg_padrao_derrota2 = imprimiu_msg_padrao_derrota3 = False
+        imprimiu_msg_derrota_energia = imprimiu_msg_derrota_concentracao = False
+        
+        # Resetando a msg padrão de vitória
+        msg_format_padrao_vitoria1 = msg_format_padrao_vitoria2 = msg_format_padrao_derrota2
+        msg_format_padrao_vitoria3 = msg_format_padrao_vitoria4 = msg_format_padrao_derrota2
+
+        imprimiu_msg_padrao_vitoria1 = imprimiu_msg_padrao_vitoria2 = False
+        imprimiu_msg_padrao_vitoria3 = imprimiu_msg_padrao_vitoria4 = False
+
+        # Limpando a tela
+        tela_principal.fill(BLACK)
+
+        if tela_menu_final:
+            pygame.mixer.music.pause()
+            if final_jogo == 'derrota':
+                som_jogador_perdeu.play()
+            elif final_jogo == 'vitoria':
+                som_jogador_ganhou.play()
+
+        botao_voltar_ativo = botao_sairr_ativo = False
+        botao_voltar = pygame.Rect(650, 345, 200, 30)
+        botao_sairr = pygame.Rect(650, 380, 200, 30)
+
+        # Trabalhando na tela do menu final
+        while tela_menu_final:
+            clk.tick(25)
+            tela_principal.blit(fundo_jogo, (0, 0))
+
+            cor_botao_voltar, cor_texto_botao_voltar = funcoes_classes_auxiliares.configura_cor_botao(botao_voltar_ativo)
+            cor_botao_sairr, cor_texto_botao_sairr = funcoes_classes_auxiliares.configura_cor_botao(botao_sairr_ativo)
+
+            msg_format_botao_voltar = fonte_2.render(msg_voltar_menu, True, cor_texto_botao_voltar)
+            msg_format_botao_sairr = fonte_2.render(msg_botao_sairr, True, cor_texto_botao_sairr)
+
+            # Incluindo botões de voltar ao menu ou de sair do jogo independente do final
+            if imprimiu_msg_padrao_derrota3 or imprimiu_msg_padrao_vitoria4:
+                # Desenhando o botão de voltar ao menu
+                pygame.draw.rect(tela_principal, cor_botao_voltar, botao_voltar)
+                # Desenhando o contorno do botão de voltar ao menu
+                pygame.draw.rect(tela_principal, BLACK, (648, 343, 202, 32), 3)
+
+                # Desenhando o botão de sair do jogo
+                pygame.draw.rect(tela_principal, cor_botao_sairr, botao_sairr)
+                # Desenhando o contorno do botão de sair do jogo
+                pygame.draw.rect(tela_principal, BLACK, (648, 378, 202, 32), 3)
+
+                # Desenhando o texto do botão de voltar ao menu
+                tela_principal.blit(msg_format_botao_voltar, (665, 348, 100, 30))
+                tela_principal.blit(msg_format_botao_sairr, (685, 382, 100, 30))
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+                mouse = pygame.mouse.get_pos()
+                # Ativando ou não o botão de voltar
+                if botao_voltar.collidepoint(mouse):
+                    botao_voltar_ativo = True
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        tela_menu_inicial = True
+                        tela_menu_final = False
+                else:
+                    botao_voltar_ativo = False
+                # Ativando ou não o botão de sair
+                if botao_sairr.collidepoint(mouse):
+                    botao_sairr_ativo = True
+                    if event.type == MOUSEBUTTONDOWN:
+                        pygame.quit()
+                        exit()
+                else:
+                    botao_sairr_ativo = False
+
+            # Decrementando timer para escrever os textos de fim de jogo
+            # Só vai ser mais lento pros tres pontinhos dramaticos da ultima msg de vitoria
+            if imprimiu_msg_padrao_vitoria3:
+                timer_msg_final_jogo -= 0.05
+            else:
+                timer_msg_final_jogo -= 0.5
+
+            # Imprimindo textos para um final onde o jogador perde
+            if final_jogo == 'derrota':
+                if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_derrota1:
+                    timer_msg_final_jogo = delay_msg_final_jogo
+                    particao_msg_padrao_derrota = msg_padrao_derrota[0:indice_msg_final_jogo]
+                    msg_format_padrao_derrota1 = fonte_2.render(particao_msg_padrao_derrota, True, BLACK)
+                    indice_msg_final_jogo += 1
+                    if indice_msg_final_jogo > len(msg_padrao_derrota):
+                        indice_msg_final_jogo = 0
+                        imprimiu_msg_padrao_derrota1 = True
+
+                if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_derrota2 and imprimiu_msg_padrao_derrota1:
+                    timer_msg_final_jogo = delay_msg_final_jogo
+                    particao_msg_padrao_derrota = msg_padrao_derrota2[0:indice_msg_final_jogo]
+                    msg_format_padrao_derrota2 = fonte_2.render(particao_msg_padrao_derrota, True, BLACK)
+                    indice_msg_final_jogo += 1
+                    if indice_msg_final_jogo > len(msg_padrao_derrota2):
+                        imprimiu_msg_padrao_derrota2 = True
+                        indice_msg_final_jogo = 0
+
+                # Msg personalizada -> final onde o jogador perde por errar muito caractere (barra concentracao <= 0)
+                if concentracao_final <= 0:
+                    if timer_msg_final_jogo <= 0 and imprimiu_msg_padrao_derrota2 \
+                            and not imprimiu_msg_derrota_concentracao:
+                        timer_msg_final_jogo = delay_msg_final_jogo
+                        particao_msg_padrao_derrota = msg_derrota_concentracao[0:indice_msg_final_jogo]
+                        msg_format_derrota_concentracao = fonte_2.render(particao_msg_padrao_derrota, True, BLACK)
+                        indice_msg_final_jogo += 1
+                        if indice_msg_final_jogo > len(msg_derrota_concentracao):
+                            imprimiu_msg_derrota_concentracao = True
+                            indice_msg_final_jogo = 0
+
+                # Msg personalizada -> final onde o jogador perde por não tomar café (barra energia <= 0)
+                if energia_final <= 0:
+                    if timer_msg_final_jogo <= 0 and imprimiu_msg_padrao_derrota2 \
+                            and not imprimiu_msg_derrota_energia:
+                        timer_msg_final_jogo = delay_msg_final_jogo
+                        particao_msg_padrao_derrota = msg_derrota_energia[0:indice_msg_final_jogo]
+                        msg_format_derrota_energia = fonte_2.render(particao_msg_padrao_derrota, True, BLACK)
+                        indice_msg_final_jogo += 1
+                        if indice_msg_final_jogo > len(msg_derrota_energia):
+                            imprimiu_msg_derrota_energia = True
+                            indice_msg_final_jogo = 0
+
+                # Imprimindo msg padrão final (que pena, está demitido)
+                if (imprimiu_msg_derrota_energia and not imprimiu_msg_padrao_derrota3) or \
+                        (imprimiu_msg_derrota_concentracao and not imprimiu_msg_padrao_derrota3):
+                    if timer_msg_final_jogo <= 0:
+                        timer_msg_final_jogo = delay_msg_final_jogo
+                        particao_msg_padrao_derrota = msg_padrao_derrota3[0:indice_msg_final_jogo]
+                        msg_format_padrao_derrota3 = fonte_2.render(particao_msg_padrao_derrota, True, BLACK)
+                        indice_msg_final_jogo += 1
+
+                        if indice_msg_final_jogo > len(msg_padrao_derrota3):
+                            imprimiu_msg_padrao_derrota3 = True
+                            indice_msg_final_jogo = 0
+
+                tela_principal.blit(msg_format_padrao_derrota1, (380, 190))
+                tela_principal.blit(msg_format_padrao_derrota2, (380, 225))
+                if energia_final <= 0:
+                    tela_principal.blit(msg_format_derrota_energia, (380, 300))
+                elif concentracao_final <= 0:
+                    tela_principal.blit(msg_format_derrota_concentracao, (380, 300))
+                tela_principal.blit(msg_format_padrao_derrota3, (380, 350))
+
+            elif final_jogo == 'vitoria':
+                if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_vitoria1:
+                    timer_msg_final_jogo = delay_msg_final_jogo
+                    particao_msg_padrao_vitoria = msg_vitoria1[0:indice_msg_final_jogo]
+                    msg_format_padrao_vitoria1 = fonte_2.render(particao_msg_padrao_vitoria, True, BLACK)
+                    indice_msg_final_jogo += 1
+                    if indice_msg_final_jogo > len(msg_vitoria1):
+                        indice_msg_final_jogo = 0
+                        imprimiu_msg_padrao_vitoria1 = True
+
+                if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_vitoria2:
+                    timer_msg_final_jogo = delay_msg_final_jogo
+                    particao_msg_padrao_vitoria = msg_vitoria2[0:indice_msg_final_jogo]
+                    msg_format_padrao_vitoria2 = fonte_2.render(particao_msg_padrao_vitoria, True, BLACK)
+                    indice_msg_final_jogo += 1
+                    if indice_msg_final_jogo > len(msg_vitoria2):
+                        indice_msg_final_jogo = 0
+                        imprimiu_msg_padrao_vitoria2 = True
+
+                if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_vitoria3:
+                    timer_msg_final_jogo = delay_msg_final_jogo
+                    particao_msg_padrao_vitoria = msg_vitoria3[0:indice_msg_final_jogo]
+                    msg_format_padrao_vitoria3 = fonte_2.render(particao_msg_padrao_vitoria, True, BLACK)
+                    indice_msg_final_jogo += 1
+                    if indice_msg_final_jogo > len(msg_vitoria3):
+                        indice_msg_final_jogo = 0
+                        imprimiu_msg_padrao_vitoria3 = True
+
+                if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_vitoria4:
+                    timer_msg_final_jogo = delay_msg_final_jogo
+                    particao_msg_padrao_vitoria = msg_vitoria4[0:indice_msg_final_jogo]
+                    msg_format_padrao_vitoria4 = fonte_2.render(particao_msg_padrao_vitoria, True, BLACK)
+                    indice_msg_final_jogo += 1
+                    if indice_msg_final_jogo > len(msg_vitoria4):
+                        indice_msg_final_jogo = 0
+                        imprimiu_msg_padrao_vitoria4 = True
+
+                tela_principal.blit(msg_format_padrao_vitoria1, (380, 190))
+                tela_principal.blit(msg_format_padrao_vitoria2, (380, 225))
+                tela_principal.blit(msg_format_padrao_vitoria3, (380, 300))
+                tela_principal.blit(msg_format_padrao_vitoria4, (828, 300))
+
+            pygame.display.flip()
+
         if tela_menu_inicial:
             pygame.mixer.music.load(os.path.join('Sons', 'musica_suspense_menu_game.mpeg'))
             pygame.mixer.music.set_volume(0.4)
             pygame.mixer.music.play(-1)
+
+
+
 
         botao_iniciar_ativo = False
         botao_dificuldade_ativo = False
         botao_sair_ativo = False
 
         botao_facil_ativo = False
-        botao_facil = pygame.Rect(largura_janela/2 - 101, altura_janela/2 + 23, 199, 60)
+        botao_facil = pygame.Rect(largura_janela / 2 - 70, altura_janela / 2 - 50, 160, 60)
 
         botao_medio_ativo = True
-        botao_medio = pygame.Rect(largura_janela/2 - 101, altura_janela/2 + 90, 199, 60)
+        botao_medio = pygame.Rect(largura_janela / 2 - 70, altura_janela / 2 + 20, 160, 60)
 
         botao_dificil_ativo = False
-        botao_dificil = pygame.Rect(largura_janela/2 - 101, altura_janela/2 + 157, 199, 60)
+        botao_dificil = pygame.Rect(largura_janela / 2 - 70, altura_janela / 2 + 90, 160, 60)
 
         escolheu_facil = False
         escolheu_medio = True
@@ -217,51 +445,40 @@ def coders_night():
 
         # Limpando a tela
         tela_principal.fill(BLACK)
-
-        # Trabalhando na tela do menu final
-        while tela_menu_final:
-            tela_principal.blit(fundo_jogo, (0, 0))
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        tela_menu_final = False
-                        tela_menu_inicial = True
-
         while tela_menu_inicial:
             tela_principal.blit(fundo_jogo, (0, 0))
             # Configura a cor dos botões do menu
-            cor_botao_iniciar, cor_texto_botao_iniciar = game_end.configura_cor_botao(botao_iniciar_ativo)
-            cor_botao_dificuldade, cor_texto_botao_dificuldade = game_end.configura_cor_botao(botao_dificuldade_ativo)
-            cor_botao_sair, cor_texto_botao_sair = game_end.configura_cor_botao(botao_sair_ativo)
-            cor_botao_facil, cor_texto_botao_facil = game_end.configura_cor_botao(botao_facil_ativo)
-            cor_botao_medio, cor_texto_botao_medio = game_end.configura_cor_botao(botao_medio_ativo)
-            cor_botao_dificil, cor_texto_botao_dificil = game_end.configura_cor_botao(botao_dificil_ativo)
+            cor_botao_iniciar, cor_texto_botao_iniciar = funcoes_classes_auxiliares.configura_cor_botao(botao_iniciar_ativo)
+            cor_botao_dificuldade, cor_texto_botao_dificuldade = funcoes_classes_auxiliares.configura_cor_botao(botao_dificuldade_ativo)
+            cor_botao_sair, cor_texto_botao_sair = funcoes_classes_auxiliares.configura_cor_botao(botao_sair_ativo)
+            cor_botao_facil, cor_texto_botao_facil = funcoes_classes_auxiliares.configura_cor_botao(botao_facil_ativo)
+            cor_botao_medio, cor_texto_botao_medio = funcoes_classes_auxiliares.configura_cor_botao(botao_medio_ativo)
+            cor_botao_dificil, cor_texto_botao_dificil = funcoes_classes_auxiliares.configura_cor_botao(botao_dificil_ativo)
 
             # region Trabalhando o menu inicial do jogo
+
             # Retângulo principal com as opções
             pygame.draw.rect(tela_principal, (60, 60, 200),
-                             (largura_janela / 2 - 200, altura_janela / 2 - 200, 400, 500), 200)
-            # Contorno do retangulo principal com as opções
-            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 202,
-                                                     altura_janela / 2 - 202, 402, 502), 4)
+                             (x_pos_caixa - 2, y_pos_caixa + 4, x_tam_caixa + 2, y_tam_caixa - 12))
+
             # Botão iniciar o jogo
             botao_iniciar = pygame.draw.rect(tela_principal, cor_botao_iniciar,
-                                             (largura_janela / 2 - 100, altura_janela / 2 - 150, 200, 80), 100)
+                                             (largura_janela / 2 - 260, altura_janela / 2 - 140, 160, 80), 100)
             # Contorno do botão iniciar
-            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 102,
-                                                     altura_janela / 2 - 152, 202, 82), 3)
+            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 262,
+                                                     altura_janela / 2 - 142, 162, 82), 3)
 
             # Botão escolher dificuldade do jogo
             botao_dificuldade = pygame.draw.rect(tela_principal, cor_botao_dificuldade,
-                                                 (largura_janela / 2 - 100, altura_janela / 2 - 45, 200, 80), 100)
+                                                 (largura_janela / 2 - 70, altura_janela / 2 - 140, 160, 80), 100)
             # Contorno do botao de dificuldade
-            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 102, altura_janela / 2 - 47, 202, 82), 3)
+            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 72, altura_janela / 2 - 142, 162, 82), 3)
 
             # Botão sair do jogo
             botao_sair = pygame.draw.rect(tela_principal, cor_botao_sair,
-                                          (largura_janela / 2 - 100, altura_janela / 2 + 62, 200, 80), 100)
+                                          (largura_janela / 2 + 128, altura_janela / 2 - 140, 160, 80), 100)
             # Contorno do botão de sair do jogo
-            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 102, altura_janela / 2 + 60, 202, 82), 3)
+            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 + 126, altura_janela / 2 - 142, 162, 82), 3)
 
             # Textos
             msg_format_nome_jogo = fonte_titulo_jogo.render(msg_nome_jogo, True, WHITE)
@@ -275,31 +492,32 @@ def coders_night():
 
             # Colocando os textos na tela
             tela_principal.blit(msg_format_nome_jogo, (largura_janela / 2 - 220, 70))
-            tela_principal.blit(msg_format_botao_iniciar, (largura_janela / 2 - 39, altura_janela / 2 - 130, 185, 80))
+            tela_principal.blit(msg_format_botao_iniciar, (largura_janela / 2 - 223, altura_janela / 2 - 116, 160, 80))
             tela_principal.blit(msg_format_botao_dificuldade,
-                                (largura_janela / 2 - 78, altura_janela / 2 - 22, 200, 80))
-            tela_principal.blit(msg_format_botao_sair, (largura_janela / 2 - 30, altura_janela / 2 + 80, 200, 80))
+                                (largura_janela / 2 - 65, altura_janela / 2 - 116, 160, 80))
+            tela_principal.blit(msg_format_botao_sair, (largura_janela / 2 + 177, altura_janela / 2 - 116, 160, 80))
 
             if mostrar_dificuldades:
 
                 # Desenhando o botao da dificuldade facil
                 pygame.draw.rect(tela_principal, cor_botao_facil, botao_facil)
                 # Contorno do botao da dificuldade facil
-                pygame.draw.rect(tela_principal, BLACK, (largura_janela/2 - 101, altura_janela/2 + 23, 199, 62), 3)
+                pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 72, altura_janela / 2 - 52, 162, 62), 3)
 
                 # Desenhando o botão da dificuldade média
                 pygame.draw.rect(tela_principal, cor_botao_medio, botao_medio)
                 # Contorno do botão da dificuldade média
-                pygame.draw.rect(tela_principal, BLACK, (largura_janela/2 - 101, altura_janela/2 + 87, 199, 63), 3)
+                pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 72, altura_janela / 2 + 18, 162, 62), 3)
 
                 # Desenhando o botão da dificuldade dificil
                 pygame.draw.rect(tela_principal, cor_botao_dificil, botao_dificil)
                 # Contorno do botão da dificuldade dificil
-                pygame.draw.rect(tela_principal, BLACK, (largura_janela/2 - 101, altura_janela/2 + 154, 199, 63), 3)
+                pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 72, altura_janela / 2 + 88, 162, 62), 3)
 
-                tela_principal.blit(msg_format_botao_facil, (largura_janela/2 - 35, altura_janela/2 + 38, 200, 80))
-                tela_principal.blit(msg_format_botao_medio, (largura_janela/2 - 40, altura_janela/2 + 104, 200, 80))
-                tela_principal.blit(msg_format_botao_dificil, (largura_janela/2 - 40, altura_janela/2 + 169, 200, 80))
+                tela_principal.blit(msg_format_botao_facil, (largura_janela / 2 - 25, altura_janela / 2 - 37, 160, 60))
+                tela_principal.blit(msg_format_botao_medio, (largura_janela / 2 - 31, altura_janela / 2 + 33, 160, 60))
+                tela_principal.blit(msg_format_botao_dificil,
+                                    (largura_janela / 2 - 32, altura_janela / 2 + 103, 160, 60))
 
                 mouse = pygame.mouse.get_pos()
 
@@ -331,7 +549,7 @@ def coders_night():
                         pygame.mixer.music.play(-1)
                 else:
                     botao_iniciar_ativo = False
-                if botao_dificuldade.collidepoint(posicao_mouse) and not mostrar_dificuldades:
+                if botao_dificuldade.collidepoint(posicao_mouse):
                     botao_dificuldade_ativo = True
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         mostrar_dificuldades = not mostrar_dificuldades
@@ -386,6 +604,8 @@ def coders_night():
             delay_trecho_codigo = 15
             timer_trecho_codigo = delay_trecho_codigo
 
+        # Limpando a tela
+        tela_principal.fill(BLACK)
         # Laço principal do jogo
         while not tela_menu_inicial and not tela_menu_final:
             # region Jogo de fato (toda a lógica)
@@ -512,7 +732,7 @@ def coders_night():
                 xicara.flutuar(posicao_xicara)
                 xicara_icone.image.set_alpha(abs(sin(valor_seno_alfa_xicara) * 255))  # animando a xícara
                 xicara_icone.flutuar(posicao_xicara_icone)
-                shift_imagem.image.set_alpha(abs(sin(valor_seno_alfa_shft) * 255)) # animando o shift
+                shift_imagem.image.set_alpha(abs(sin(valor_seno_alfa_shft) * 255))  # animando o shift
                 valor_seno_alfa_xicara += 0.09
                 valor_seno_alfa_shft += 0.09
             else:
@@ -623,14 +843,12 @@ def coders_night():
 
             # Esgotamento da barra de energia
             if largura_barra_energia <= 0 or largura_barra_concentracao <= 0:
-                print("Voce perdeu!!!")
-                game_end.game_end('derrota')
+                final_jogo = 'derrota'
                 tela_menu_final = True
 
             #  linhas que começam com hashtag separam os algoritmos
             if indice_linha_atual - numero_hashtags == numero_linhas_arquivo:
-                print("Voce ganhou!!")
-                game_end.game_end('vitoria')
+                final_jogo = 'vitoria'
                 tela_menu_final = True
 
             pygame.display.flip()

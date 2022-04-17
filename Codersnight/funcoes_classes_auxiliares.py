@@ -1,21 +1,6 @@
 from coders_night import *
 
 
-def game_end(final):
-    if final == 'derrota':
-        derrota()
-    elif final == 'vitoria':
-        vitoria()
-
-
-def derrota():
-    pass
-
-
-def vitoria():
-    pass
-
-
 class FiguraClicavel(pygame.sprite.Sprite):
     def __init__(self, meu_sprite, posicao):
         super().__init__()
