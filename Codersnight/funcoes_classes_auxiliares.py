@@ -1,5 +1,9 @@
 from coders_night import *
 
+# Cores
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
 
 class FiguraClicavel(pygame.sprite.Sprite):
     def __init__(self, meu_sprite, posicao):
@@ -9,7 +13,7 @@ class FiguraClicavel(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.posicao)
 
 
-class Xicara(pygame.sprite.Sprite): #NEW
+class Xicara(pygame.sprite.Sprite):
     def __init__(self, tamanho, posicao_top_left):
         pygame.sprite.Sprite.__init__(self)
         self.sprites = []

@@ -16,18 +16,6 @@ from random import randint
 # altera o caminho do terminal para o caminho do arquivo
 import os
 
-# cores dos objetos
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-RED = (255, 50, 0)
-BLUE = (0, 50, 255)
-YELLOW = (255, 255, 0)
-ROXO = (153, 51, 153)
-
-COR_ALGORITMOS = [GREEN, YELLOW, ROXO]
-
-
 # NUMERO DE LINHAS DOS ALGORITMOS
 # NUMERO PRIMO: 9
 # PA: 9
@@ -39,6 +27,12 @@ def coders_night():
     # inicializacao da library do pygame
     pygame.init()
     # pygame.key.set_repeat(300, 110)  # permite segurar uma tela_principal (como apagar os caracteres com o backspace)
+
+    # cores dos objetos
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    GREEN = (0, 255, 0)
+    RED = (255, 50, 0)
 
     # dimensoes da janela do jogo
     largura_janela = 1280
@@ -68,9 +62,9 @@ def coders_night():
     som_terminou_linha = pygame.mixer.Sound(os.path.join('Sons', 'som_terminou_uma_linha.wav'))
     som_terminou_linha.set_volume(0.4)
     som_botao_clicado = pygame.mixer.Sound(os.path.join('Sons', 'som_botao_clicado.mp3'))
-    som_botao_clicado.set_volume(0.9)
+    som_botao_clicado.set_volume(1)
     som_selecionando_botao = pygame.mixer.Sound(os.path.join('Sons', 'som_selecionando_botao.flac'))
-    som_selecionando_botao.set_volume(0.9)
+    som_selecionando_botao.set_volume(0.3)
 
     # definicao das fontes dos textos
     fonte_1 = pygame.font.SysFont('arial', 27, True, False)
@@ -267,19 +261,12 @@ def coders_night():
         botao_voltar = pygame.Rect(650, 345, 200, 30)
         botao_sairr = pygame.Rect(650, 380, 200, 30)
 
-        mouse_por_cima_botao = False
+        ja_tocou_som_botao_selecionado = [False, False]
 
         # Trabalhando na tela do menu final
         while tela_menu_final:
             clk.tick(25)
             tela_principal.blit(fundo_jogo, (0, 0))
-
-            # som de botao selecionado
-            if botao_voltar_ativo or botao_sairr_ativo:
-                mouse_por_cima_botao = True
-            if mouse_por_cima_botao:
-                mouse_por_cima_botao = False
-                som_selecionando_botao.play()
 
             cor_botao_voltar, cor_texto_botao_voltar = funcoes_classes_auxiliares.configura_cor_botao(
                 botao_voltar_ativo)
@@ -313,7 +300,6 @@ def coders_night():
                 # Ativando ou não o botão de voltar
                 if botao_voltar.collidepoint(mouse):
                     botao_voltar_ativo = True
-                    som_selecionando_botao.play()
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         som_botao_clicado.play()
                         sleep(0.04)
@@ -324,9 +310,9 @@ def coders_night():
                 # Ativando ou não o botão de sair
                 if botao_sairr.collidepoint(mouse):
                     botao_sairr_ativo = True
-                    som_selecionando_botao.play()
                     if event.type == MOUSEBUTTONDOWN:
                         som_botao_clicado.play()
+                        sleep(0.35)
                         pygame.quit()
                         exit()
                 else:
@@ -446,6 +432,16 @@ def coders_night():
                 tela_principal.blit(msg_format_padrao_vitoria3, (380, 300))
                 tela_principal.blit(msg_format_padrao_vitoria4, (828, 300))
 
+            # som de botao selecionado
+            lista_booleans_botoes = [botao_voltar_ativo, botao_sairr_ativo]
+            for indice, botao in enumerate(lista_booleans_botoes):
+                if imprimiu_msg_padrao_vitoria4 or imprimiu_msg_padrao_derrota3:
+                    if botao and not ja_tocou_som_botao_selecionado[indice]:
+                        som_selecionando_botao.play()
+                        ja_tocou_som_botao_selecionado[indice] = True
+                    if not botao and ja_tocou_som_botao_selecionado[indice]:
+                        ja_tocou_som_botao_selecionado[indice] = False
+
             pygame.display.flip()
 
         if tela_menu_inicial:
@@ -458,13 +454,13 @@ def coders_night():
         botao_sair_ativo = False
 
         botao_facil_ativo = False
-        botao_facil = pygame.Rect(largura_janela / 2 - 70, altura_janela / 2 - 50, 160, 60)
+        botao_facil = pygame.Rect(largura_janela / 2 - 65, altura_janela / 2 - 50, 160, 60)
 
         botao_medio_ativo = True
-        botao_medio = pygame.Rect(largura_janela / 2 - 70, altura_janela / 2 + 20, 160, 60)
+        botao_medio = pygame.Rect(largura_janela / 2 - 65, altura_janela / 2 + 20, 160, 60)
 
         botao_dificil_ativo = False
-        botao_dificil = pygame.Rect(largura_janela / 2 - 70, altura_janela / 2 + 90, 160, 60)
+        botao_dificil = pygame.Rect(largura_janela / 2 - 65, altura_janela / 2 + 90, 160, 60)
 
         escolheu_facil = False
         escolheu_medio = True
@@ -472,11 +468,12 @@ def coders_night():
 
         mostrar_dificuldades = False
 
-        tocar = True
+        ja_tocou_som_botao_selecionado = [False, False, False, False, True, False]
 
         # Limpando a tela
         tela_principal.fill(BLACK)
         while tela_menu_inicial:
+
             tela_principal.blit(fundo_jogo, (0, 0))
 
             # Configura a cor dos botões do menu
@@ -537,22 +534,22 @@ def coders_night():
                 # Desenhando o botao da dificuldade facil
                 pygame.draw.rect(tela_principal, cor_botao_facil, botao_facil)
                 # Contorno do botao da dificuldade facil
-                pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 72, altura_janela / 2 - 52, 162, 62), 3)
+                pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 67, altura_janela / 2 - 52, 162, 62), 3)
 
                 # Desenhando o botão da dificuldade média
                 pygame.draw.rect(tela_principal, cor_botao_medio, botao_medio)
                 # Contorno do botão da dificuldade média
-                pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 72, altura_janela / 2 + 18, 162, 62), 3)
+                pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 67, altura_janela / 2 + 18, 162, 62), 3)
 
                 # Desenhando o botão da dificuldade dificil
                 pygame.draw.rect(tela_principal, cor_botao_dificil, botao_dificil)
                 # Contorno do botão da dificuldade dificil
-                pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 72, altura_janela / 2 + 88, 162, 62), 3)
+                pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 67, altura_janela / 2 + 88, 162, 62), 3)
 
-                tela_principal.blit(msg_format_botao_facil, (largura_janela / 2 - 25, altura_janela / 2 - 37, 160, 60))
-                tela_principal.blit(msg_format_botao_medio, (largura_janela / 2 - 31, altura_janela / 2 + 33, 160, 60))
+                tela_principal.blit(msg_format_botao_facil, (largura_janela / 2 - 20, altura_janela / 2 - 37, 160, 60))
+                tela_principal.blit(msg_format_botao_medio, (largura_janela / 2 - 28, altura_janela / 2 + 33, 160, 60))
                 tela_principal.blit(msg_format_botao_dificil,
-                                    (largura_janela / 2 - 32, altura_janela / 2 + 103, 160, 60))
+                                    (largura_janela / 2 - 29, altura_janela / 2 + 103, 160, 60))
 
                 mouse = pygame.mouse.get_pos()
 
@@ -575,15 +572,24 @@ def coders_night():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
+
                 posicao_mouse = pygame.mouse.get_pos()
+
                 if botao_iniciar.collidepoint(posicao_mouse) and not mostrar_dificuldades:
                     botao_iniciar_ativo = True
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         tela_menu_inicial = False
                         som_botao_clicado.play()
                         sleep(0.04)
-                        pygame.mixer.music.load(os.path.join('Sons', "musica_lofi.mp3"))
-                        pygame.mixer.music.set_volume(0.4)
+                        if escolheu_facil:
+                            pygame.mixer.music.load(os.path.join('Sons', "musica_lofi.mp3"))
+                            pygame.mixer.music.set_volume(0.4)
+                        elif escolheu_medio:
+                            pygame.mixer.music.load(os.path.join('Sons', 'som_fundo_level2.mp3'))
+                            pygame.mixer.music.set_volume(0.15)
+                        elif escolheu_dificil:
+                            pygame.mixer.music.load(os.path.join('Sons', 'som_fundo_level3.mp3'))
+                            pygame.mixer.music.set_volume(0.15)
                         pygame.mixer.music.play(-1)
                 else:
                     botao_iniciar_ativo = False
@@ -617,7 +623,7 @@ def coders_night():
                     botao_sair_ativo = True
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         som_botao_clicado.play()
-                        sleep(0.02)
+                        sleep(0.25)
                         pygame.quit()
                         exit()
                 else:
@@ -629,22 +635,14 @@ def coders_night():
                         mostrar_dificuldades = False
 
             # som de botao selecionado
-            mouse = pygame.mouse.get_pos()
-            colisoes1 = not mostrar_dificuldades and (
-                    botao_iniciar.collidepoint(mouse) or botao_sair.collidepoint(mouse)
-                    or botao_dificuldade.collidepoint(mouse))
-            colisoes2 = mostrar_dificuldades and (
-                    botao_facil.collidepoint(mouse) or botao_medio.collidepoint(mouse)
-                    or botao_dificil.collidepoint(mouse) or botao_dificuldade.collidepoint(mouse)
-                    or botao_iniciar.collidepoint(mouse) or botao_sair.collidepoint(mouse))
-
-            tocar = not (
-                        botao_iniciar_ativo or botao_dificuldade_ativo or botao_sair_ativo or botao_facil_ativo or
-                        botao_dificil_ativo)
-            # SE EU TOCO NO MEDIO OU (NO INICIAL OU NO SAIR COM AS DIFICULDADES ABERTAS DA BOSTA)
-            print(tocar)
-            if (colisoes1 or colisoes2) and tocar:
-                som_selecionando_botao.play()
+            lista_booleans_botoes = [botao_iniciar_ativo, botao_dificuldade_ativo, botao_sair_ativo, botao_facil_ativo,
+                                     botao_medio_ativo, botao_dificil_ativo]
+            for indice, botao in enumerate(lista_booleans_botoes):
+                if botao and not ja_tocou_som_botao_selecionado[indice]:
+                    som_selecionando_botao.play()
+                    ja_tocou_som_botao_selecionado[indice] = True
+                if not botao and ja_tocou_som_botao_selecionado[indice]:
+                    ja_tocou_som_botao_selecionado[indice] = False
 
             pygame.display.flip()
             # endregion
@@ -670,8 +668,11 @@ def coders_night():
         tamanho_barra_progresso = 0
         troquei_linha = False
 
+        tomou_dano_por_tempo = False
+
         # Limpando a tela
         tela_principal.fill(BLACK)
+
         # Laço principal do jogo
         while not tela_menu_inicial and not tela_menu_final:
             # region Jogo de fato (toda a lógica)
@@ -681,7 +682,7 @@ def coders_night():
 
             #  Lógica para troca de linhas no algoritmo
             if minha_fila.vazia():
-                if indice_linha_atual > 0:
+                if indice_linha_atual > 0 and not tomou_dano_por_tempo:
                     som_terminou_linha.play()
                 troquei_linha = True
                 indice_linha_atual += 1
@@ -699,13 +700,6 @@ def coders_night():
                     codigo_indice += 1
                     if codigo_indice > 0:
                         som_level_up.play()
-                        pygame.mixer.music.pause()
-                        if codigo_indice == 1:
-                            pygame.mixer.music.load(os.path.join('Sons', 'som_fundo_level2.mp3'))
-                        elif codigo_indice == 2:
-                            pygame.mixer.music.load(os.path.join('Sons', 'som_fundo_level3.mp3'))
-                        pygame.mixer.music.set_volume(0.4)
-                        pygame.mixer.music.play(-1)
                 linha_arquivo_atual = linha_arquivo_atual.strip()
                 for caractere in linha_arquivo_atual:
                     minha_fila.insere(caractere)
@@ -777,11 +771,9 @@ def coders_night():
             msg_timer = f'Tempo: {timer_trecho_codigo:2.2f}'
 
             # Formatando textos
-            # no texto base estava COR_ALGORITMOS[cor_algoritmo_atual], mas deixei padrão verde pra todos mesmo
             msg_format_texto_base = fonte_2.render(msg_texto, False, GREEN)
             msg_algoritmo = f'{titulos_algoritmos[codigo_indice]}'
             msg_format_algoritmo = fonte_1.render(msg_algoritmo, False, WHITE)
-            # msg_format_progresso = fonte_2.render(msg_progresso, False, WHITE)  TIRANDO A MSG DE PROGRESSO POIS JA É INTUITIVO
             msg_format_placeholder = fonte_2.render(msg_input_placeholder, False, (100, 100, 100))
             msg_format_input_text = fonte_2.render(input_text, False, BLACK)
             largura_input_texto = msg_format_input_text.get_width()
@@ -793,8 +785,6 @@ def coders_night():
             msg_format_texto_timer_perigo = fonte_timer.render(msg_timer[7:], False, cor_timer_perigo)
 
             # Colocando textos na tela_principal
-            # tela_principal.blit(msg_format_progresso,
-            #                    (x_pos_progresso - msg_format_progresso.get_width() / 2, y_pos_progresso)) TIRANDO A MSG DE PROGRESSO POIS JA É INTUITIVO
             tela_principal.blit(msg_format_texto_timer_safe, (1050, 25))
             tela_principal.blit(msg_format_texto_timer_perigo, (1150, 25))
             tela_principal.blit(msg_format_texto_base, (x_pos_caixa + 68, y_pos_caixa + 80))
@@ -920,7 +910,9 @@ def coders_night():
             if minha_fila.vazia():
                 input_text = ''
                 timer_trecho_codigo = delay_trecho_codigo
+                tomou_dano_por_tempo = False
             elif timer_trecho_codigo <= 0:
+                tomou_dano_por_tempo = True
                 input_text = ''
                 minha_fila = fila.Fila()
                 som_acabou_o_tempo.play()
