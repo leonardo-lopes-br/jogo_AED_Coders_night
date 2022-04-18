@@ -5,6 +5,7 @@
 import pygame
 from pygame.locals import *
 from sys import exit
+from time import sleep
 
 from pygame.time import Clock
 
@@ -25,6 +26,12 @@ YELLOW = (255, 255, 0)
 ROXO = (153, 51, 153)
 
 COR_ALGORITMOS = [GREEN, YELLOW, ROXO]
+
+
+# NUMERO DE LINHAS DOS ALGORITMOS
+# NUMERO PRIMO: 9
+# PA: 9
+# SACAR NO BANCO: 22
 
 
 def coders_night():
@@ -56,6 +63,14 @@ def coders_night():
     som_jogador_perdeu.set_volume(0.09)
     som_jogador_ganhou = pygame.mixer.Sound(os.path.join('Sons', 'som_ganhou_jogo.wav'))
     som_jogador_ganhou.set_volume(0.09)
+    som_level_up = pygame.mixer.Sound(os.path.join('Sons', 'level_up.mpeg'))
+    som_level_up.set_volume(0.13)
+    som_terminou_linha = pygame.mixer.Sound(os.path.join('Sons', 'som_terminou_uma_linha.wav'))
+    som_terminou_linha.set_volume(0.4)
+    som_botao_clicado = pygame.mixer.Sound(os.path.join('Sons', 'som_botao_clicado.mp3'))
+    som_botao_clicado.set_volume(0.9)
+    som_selecionando_botao = pygame.mixer.Sound(os.path.join('Sons', 'som_selecionando_botao.flac'))
+    som_selecionando_botao.set_volume(0.9)
 
     # definicao das fontes dos textos
     fonte_1 = pygame.font.SysFont('arial', 27, True, False)
@@ -114,10 +129,10 @@ def coders_night():
     valor_seno_alfa_shft = 0
 
     # Títulos dos algoritmos
-    titulos_algoritmos = ['Numero primo', 'PA', 'Sacar no Banco']
+    titulos_algoritmos = ['Numero primo', 'Progressão Aritmética', 'Sacar no Banco']
 
     # Mensagens fixas
-    msg_progresso = 'Progresso'
+    # msg_progresso = 'Progresso' TIRANDO A MSG DE PROGRESSO POIS JA É INTUITIVO
     msg_input_placeholder = 'Digite aqui...'
     msg_botao_iniciar = 'Iniciar'
     msg_nome_jogo = "Coder's Night"
@@ -133,15 +148,15 @@ def coders_night():
 
     msg_derrota_energia = 'Você não tomou café para recuperar as energias!'
     msg_derrota_concentracao = 'Você digitou muitos caracteres errados!'
-    
+
     msg_vitoria1 = 'Parabéns! Você conseguiu programar tudo!'
     msg_vitoria2 = 'Se manter a dedicação, talvez seja promovido!'
     msg_vitoria3 = 'Talvez agora deva ir programar de verdade'
     msg_vitoria4 = '.....'
 
     # Posição fixa do texto 'Progresso'
-    x_pos_progresso = x_pos_caixa + x_tam_caixa / 2
-    y_pos_progresso = y_pos_caixa + y_tam_caixa - 95
+    # x_pos_progresso = x_pos_caixa + x_tam_caixa / 2
+    # y_pos_progresso = y_pos_caixa + y_tam_caixa - 95
 
     # Posição fixa do texto 'Digite aqui...'
     x_pos_placeholder = x_pos_caixa + 40
@@ -178,6 +193,8 @@ def coders_night():
         arquivo_algoritmos = open(os.path.join('Textos', 'algoritmos_textos.txt'), 'r')
         indice_linha_atual = 0  # para finalizar o jogo quando chegar no numero de linhas
         numero_linhas_arquivo = 0
+        numero_linhas_por_algoritmo = [9, 9, 22]
+        indice_linha_algoritmo_atual = 0
         numero_hashtags = 0
         linha_arquivo = arquivo_algoritmos.readline()
         while linha_arquivo:
@@ -228,7 +245,7 @@ def coders_night():
 
         imprimiu_msg_padrao_derrota1 = imprimiu_msg_padrao_derrota2 = imprimiu_msg_padrao_derrota3 = False
         imprimiu_msg_derrota_energia = imprimiu_msg_derrota_concentracao = False
-        
+
         # Resetando a msg padrão de vitória
         msg_format_padrao_vitoria1 = msg_format_padrao_vitoria2 = msg_format_padrao_derrota2
         msg_format_padrao_vitoria3 = msg_format_padrao_vitoria4 = msg_format_padrao_derrota2
@@ -250,12 +267,22 @@ def coders_night():
         botao_voltar = pygame.Rect(650, 345, 200, 30)
         botao_sairr = pygame.Rect(650, 380, 200, 30)
 
+        mouse_por_cima_botao = False
+
         # Trabalhando na tela do menu final
         while tela_menu_final:
             clk.tick(25)
             tela_principal.blit(fundo_jogo, (0, 0))
 
-            cor_botao_voltar, cor_texto_botao_voltar = funcoes_classes_auxiliares.configura_cor_botao(botao_voltar_ativo)
+            # som de botao selecionado
+            if botao_voltar_ativo or botao_sairr_ativo:
+                mouse_por_cima_botao = True
+            if mouse_por_cima_botao:
+                mouse_por_cima_botao = False
+                som_selecionando_botao.play()
+
+            cor_botao_voltar, cor_texto_botao_voltar = funcoes_classes_auxiliares.configura_cor_botao(
+                botao_voltar_ativo)
             cor_botao_sairr, cor_texto_botao_sairr = funcoes_classes_auxiliares.configura_cor_botao(botao_sairr_ativo)
 
             msg_format_botao_voltar = fonte_2.render(msg_voltar_menu, True, cor_texto_botao_voltar)
@@ -286,7 +313,10 @@ def coders_night():
                 # Ativando ou não o botão de voltar
                 if botao_voltar.collidepoint(mouse):
                     botao_voltar_ativo = True
+                    som_selecionando_botao.play()
                     if event.type == pygame.MOUSEBUTTONDOWN:
+                        som_botao_clicado.play()
+                        sleep(0.04)
                         tela_menu_inicial = True
                         tela_menu_final = False
                 else:
@@ -294,7 +324,9 @@ def coders_night():
                 # Ativando ou não o botão de sair
                 if botao_sairr.collidepoint(mouse):
                     botao_sairr_ativo = True
+                    som_selecionando_botao.play()
                     if event.type == MOUSEBUTTONDOWN:
+                        som_botao_clicado.play()
                         pygame.quit()
                         exit()
                 else:
@@ -417,12 +449,9 @@ def coders_night():
             pygame.display.flip()
 
         if tela_menu_inicial:
-            pygame.mixer.music.load(os.path.join('Sons', 'musica_suspense_menu_game.mpeg'))
+            pygame.mixer.music.load(os.path.join('Sons', 'som_fundo_tela_inicial.mp3'))
             pygame.mixer.music.set_volume(0.4)
             pygame.mixer.music.play(-1)
-
-
-
 
         botao_iniciar_ativo = False
         botao_dificuldade_ativo = False
@@ -443,17 +472,23 @@ def coders_night():
 
         mostrar_dificuldades = False
 
+        tocar = True
+
         # Limpando a tela
         tela_principal.fill(BLACK)
         while tela_menu_inicial:
             tela_principal.blit(fundo_jogo, (0, 0))
+
             # Configura a cor dos botões do menu
-            cor_botao_iniciar, cor_texto_botao_iniciar = funcoes_classes_auxiliares.configura_cor_botao(botao_iniciar_ativo)
-            cor_botao_dificuldade, cor_texto_botao_dificuldade = funcoes_classes_auxiliares.configura_cor_botao(botao_dificuldade_ativo)
+            cor_botao_iniciar, cor_texto_botao_iniciar = funcoes_classes_auxiliares.configura_cor_botao(
+                botao_iniciar_ativo)
+            cor_botao_dificuldade, cor_texto_botao_dificuldade = funcoes_classes_auxiliares.configura_cor_botao(
+                botao_dificuldade_ativo)
             cor_botao_sair, cor_texto_botao_sair = funcoes_classes_auxiliares.configura_cor_botao(botao_sair_ativo)
             cor_botao_facil, cor_texto_botao_facil = funcoes_classes_auxiliares.configura_cor_botao(botao_facil_ativo)
             cor_botao_medio, cor_texto_botao_medio = funcoes_classes_auxiliares.configura_cor_botao(botao_medio_ativo)
-            cor_botao_dificil, cor_texto_botao_dificil = funcoes_classes_auxiliares.configura_cor_botao(botao_dificil_ativo)
+            cor_botao_dificil, cor_texto_botao_dificil = funcoes_classes_auxiliares.configura_cor_botao(
+                botao_dificil_ativo)
 
             # region Trabalhando o menu inicial do jogo
 
@@ -470,9 +505,9 @@ def coders_night():
 
             # Botão escolher dificuldade do jogo
             botao_dificuldade = pygame.draw.rect(tela_principal, cor_botao_dificuldade,
-                                                 (largura_janela / 2 - 70, altura_janela / 2 - 140, 160, 80), 100)
+                                                 (largura_janela / 2 - 65, altura_janela / 2 - 140, 160, 80), 100)
             # Contorno do botao de dificuldade
-            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 72, altura_janela / 2 - 142, 162, 82), 3)
+            pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 67, altura_janela / 2 - 142, 162, 82), 3)
 
             # Botão sair do jogo
             botao_sair = pygame.draw.rect(tela_principal, cor_botao_sair,
@@ -494,7 +529,7 @@ def coders_night():
             tela_principal.blit(msg_format_nome_jogo, (largura_janela / 2 - 220, 70))
             tela_principal.blit(msg_format_botao_iniciar, (largura_janela / 2 - 223, altura_janela / 2 - 116, 160, 80))
             tela_principal.blit(msg_format_botao_dificuldade,
-                                (largura_janela / 2 - 65, altura_janela / 2 - 116, 160, 80))
+                                (largura_janela / 2 - 60, altura_janela / 2 - 116, 160, 80))
             tela_principal.blit(msg_format_botao_sair, (largura_janela / 2 + 177, altura_janela / 2 - 116, 160, 80))
 
             if mostrar_dificuldades:
@@ -535,6 +570,7 @@ def coders_night():
                 else:
                     botao_dificil_ativo = botao_dificil.collidepoint(mouse)
 
+            # Eventos do menu inicial
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -544,6 +580,8 @@ def coders_night():
                     botao_iniciar_ativo = True
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         tela_menu_inicial = False
+                        som_botao_clicado.play()
+                        sleep(0.04)
                         pygame.mixer.music.load(os.path.join('Sons', "musica_lofi.mp3"))
                         pygame.mixer.music.set_volume(0.4)
                         pygame.mixer.music.play(-1)
@@ -552,6 +590,7 @@ def coders_night():
                 if botao_dificuldade.collidepoint(posicao_mouse):
                     botao_dificuldade_ativo = True
                     if event.type == pygame.MOUSEBUTTONDOWN:
+                        som_botao_clicado.play()
                         mostrar_dificuldades = not mostrar_dificuldades
                 else:
                     botao_dificuldade_ativo = False
@@ -559,14 +598,17 @@ def coders_night():
                 # Testando dificuldades
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if botao_facil.collidepoint(posicao_mouse):
+                        som_botao_clicado.play()
                         escolheu_facil = True
                         escolheu_medio = False
                         escolheu_dificil = False
                     elif botao_medio.collidepoint(posicao_mouse):
+                        som_botao_clicado.play()
                         escolheu_facil = False
                         escolheu_medio = True
                         escolheu_dificil = False
                     elif botao_dificil.collidepoint(posicao_mouse):
+                        som_botao_clicado.play()
                         escolheu_facil = False
                         escolheu_medio = False
                         escolheu_dificil = True
@@ -574,6 +616,8 @@ def coders_night():
                 if botao_sair.collidepoint(posicao_mouse) and not mostrar_dificuldades:
                     botao_sair_ativo = True
                     if event.type == pygame.MOUSEBUTTONDOWN:
+                        som_botao_clicado.play()
+                        sleep(0.02)
                         pygame.quit()
                         exit()
                 else:
@@ -583,6 +627,24 @@ def coders_night():
                 if event.type == MOUSEBUTTONDOWN:
                     if mostrar_dificuldades and not botao_dificuldade.collidepoint(posicao_mouse):
                         mostrar_dificuldades = False
+
+            # som de botao selecionado
+            mouse = pygame.mouse.get_pos()
+            colisoes1 = not mostrar_dificuldades and (
+                    botao_iniciar.collidepoint(mouse) or botao_sair.collidepoint(mouse)
+                    or botao_dificuldade.collidepoint(mouse))
+            colisoes2 = mostrar_dificuldades and (
+                    botao_facil.collidepoint(mouse) or botao_medio.collidepoint(mouse)
+                    or botao_dificil.collidepoint(mouse) or botao_dificuldade.collidepoint(mouse)
+                    or botao_iniciar.collidepoint(mouse) or botao_sair.collidepoint(mouse))
+
+            tocar = not (
+                        botao_iniciar_ativo or botao_dificuldade_ativo or botao_sair_ativo or botao_facil_ativo or
+                        botao_dificil_ativo)
+            # SE EU TOCO NO MEDIO OU (NO INICIAL OU NO SAIR COM AS DIFICULDADES ABERTAS DA BOSTA)
+            print(tocar)
+            if (colisoes1 or colisoes2) and tocar:
+                som_selecionando_botao.play()
 
             pygame.display.flip()
             # endregion
@@ -604,6 +666,10 @@ def coders_night():
             delay_trecho_codigo = 15
             timer_trecho_codigo = delay_trecho_codigo
 
+        # Resetando barra de progresso do algoritmo
+        tamanho_barra_progresso = 0
+        troquei_linha = False
+
         # Limpando a tela
         tela_principal.fill(BLACK)
         # Laço principal do jogo
@@ -615,17 +681,31 @@ def coders_night():
 
             #  Lógica para troca de linhas no algoritmo
             if minha_fila.vazia():
+                if indice_linha_atual > 0:
+                    som_terminou_linha.play()
+                troquei_linha = True
                 indice_linha_atual += 1
+                indice_linha_algoritmo_atual += 1
                 texto_base = ''
                 indice_caractere_atual = 0
                 linha_arquivo_atual = arquivo_algoritmos.readline()
                 linha_arquivo_atual = linha_arquivo_atual[:-1]
                 # Condição de troca de algoritmo
                 if linha_arquivo_atual == '#':
+                    indice_linha_algoritmo_atual = 0
                     cor_algoritmo_atual += 1
                     linha_arquivo_atual = arquivo_algoritmos.readline()
                     linha_arquivo_atual = linha_arquivo_atual[:-1]
                     codigo_indice += 1
+                    if codigo_indice > 0:
+                        som_level_up.play()
+                        pygame.mixer.music.pause()
+                        if codigo_indice == 1:
+                            pygame.mixer.music.load(os.path.join('Sons', 'som_fundo_level2.mp3'))
+                        elif codigo_indice == 2:
+                            pygame.mixer.music.load(os.path.join('Sons', 'som_fundo_level3.mp3'))
+                        pygame.mixer.music.set_volume(0.4)
+                        pygame.mixer.music.play(-1)
                 linha_arquivo_atual = linha_arquivo_atual.strip()
                 for caractere in linha_arquivo_atual:
                     minha_fila.insere(caractere)
@@ -657,8 +737,8 @@ def coders_night():
 
             # Desenhando retângulos dos textos:
             # Retângulo principal (tela_principal central)
-            pygame.draw.rect(tela_principal, (51, 153, 255), (x_pos_caixa - 2, y_pos_caixa + 4, x_tam_caixa + 2,
-                                                              y_tam_caixa - 12))
+            pygame.draw.rect(tela_principal, (60, 60, 200), (x_pos_caixa - 2, y_pos_caixa + 4, x_tam_caixa + 2,
+                                                             y_tam_caixa - 12))
 
             # Retângulo da input box (é atribuído a uma variável para verificar a colisão)
             input_texto_box = pygame.draw.rect(tela_principal, cor_input_box, (x_pos_caixa + 30, y_pos_caixa + 135,
@@ -669,15 +749,21 @@ def coders_night():
             # Barra de porcentagem concluída do jogo
             # Retângulo de fundo do progresso (branco)
             pygame.draw.rect(tela_principal, WHITE,
-                             (x_pos_caixa + 40, y_pos_caixa + y_tam_caixa - 55, x_tam_caixa - 80, 35))
+                             (x_pos_caixa + 40, y_pos_caixa + y_tam_caixa - 55, x_tam_caixa - 80, 20))
+            if indice_linha_algoritmo_atual >= 0 and troquei_linha:
+                tamanho_barra_progresso = (indice_linha_algoritmo_atual - 1) / \
+                                          numero_linhas_por_algoritmo[codigo_indice] * (x_tam_caixa - 80)
+
             # Retângulo do progresso verde (barra verde por cima da cor branca de fundo, com base na % de linhas feitas)
-            pygame.draw.rect(tela_principal, GREEN, (x_pos_caixa + 40,
-                                                     y_pos_caixa + y_tam_caixa - 55,
-                                                     (indice_linha_atual - 1) / numero_linhas_arquivo *
-                                                     (x_tam_caixa - 80), 35))
+            pygame.draw.rect(tela_principal, GREEN, (x_pos_caixa + 40, y_pos_caixa + y_tam_caixa - 55,
+                                                     tamanho_barra_progresso, 20))
             # Retângulo de contorno do retângulo de progresso do jogo
             pygame.draw.rect(tela_principal, BLACK,
-                             (x_pos_caixa + 38, y_pos_caixa + y_tam_caixa - 57, x_tam_caixa - 78, 37), 3)
+                             (x_pos_caixa + 38, y_pos_caixa + y_tam_caixa - 57, x_tam_caixa - 78, 22), 3)
+            if tamanho_barra_progresso < indice_linha_algoritmo_atual / \
+                    numero_linhas_por_algoritmo[codigo_indice] * (x_tam_caixa - 80):
+                tamanho_barra_progresso += 1
+                troquei_linha = False
 
             # Mostra a sentença algorítica a ser digitada (em branco) -> fica por baixo dos caracteres verdes (corretos)
             linha_arquivo_renderizar = fonte_2.render(linha_arquivo_atual, False, WHITE)
@@ -691,10 +777,11 @@ def coders_night():
             msg_timer = f'Tempo: {timer_trecho_codigo:2.2f}'
 
             # Formatando textos
-            msg_format_texto_base = fonte_2.render(msg_texto, False, COR_ALGORITMOS[cor_algoritmo_atual])
-            msg_algoritmo = f'Algoritmo {codigo_indice + 1}: {titulos_algoritmos[codigo_indice]}'
+            # no texto base estava COR_ALGORITMOS[cor_algoritmo_atual], mas deixei padrão verde pra todos mesmo
+            msg_format_texto_base = fonte_2.render(msg_texto, False, GREEN)
+            msg_algoritmo = f'{titulos_algoritmos[codigo_indice]}'
             msg_format_algoritmo = fonte_1.render(msg_algoritmo, False, WHITE)
-            msg_format_progresso = fonte_2.render(msg_progresso, False, WHITE)
+            # msg_format_progresso = fonte_2.render(msg_progresso, False, WHITE)  TIRANDO A MSG DE PROGRESSO POIS JA É INTUITIVO
             msg_format_placeholder = fonte_2.render(msg_input_placeholder, False, (100, 100, 100))
             msg_format_input_text = fonte_2.render(input_text, False, BLACK)
             largura_input_texto = msg_format_input_text.get_width()
@@ -706,8 +793,8 @@ def coders_night():
             msg_format_texto_timer_perigo = fonte_timer.render(msg_timer[7:], False, cor_timer_perigo)
 
             # Colocando textos na tela_principal
-            tela_principal.blit(msg_format_progresso,
-                                (x_pos_progresso - msg_format_progresso.get_width() / 2, y_pos_progresso))
+            # tela_principal.blit(msg_format_progresso,
+            #                    (x_pos_progresso - msg_format_progresso.get_width() / 2, y_pos_progresso)) TIRANDO A MSG DE PROGRESSO POIS JA É INTUITIVO
             tela_principal.blit(msg_format_texto_timer_safe, (1050, 25))
             tela_principal.blit(msg_format_texto_timer_perigo, (1150, 25))
             tela_principal.blit(msg_format_texto_base, (x_pos_caixa + 68, y_pos_caixa + 80))
