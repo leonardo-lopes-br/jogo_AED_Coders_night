@@ -17,9 +17,9 @@ from random import randint
 import os
 
 # NUMERO DE LINHAS DOS ALGORITMOS
-# NUMERO PRIMO: 9
+# NUMERO PRIMO: 14
 # PA: 9
-# SACAR NO BANCO: 22
+# FIBONACCI: 10
 
 
 def coders_night():
@@ -123,7 +123,7 @@ def coders_night():
     valor_seno_alfa_shft = 0
 
     # Títulos dos algoritmos
-    titulos_algoritmos = ['Numero primo', 'Progressão Aritmética', 'Sacar no Banco']
+    titulos_algoritmos = ['Numero primo', 'Progressão Aritmética', 'Fibonacci']
 
     # Mensagens fixas
     # msg_progresso = 'Progresso' TIRANDO A MSG DE PROGRESSO POIS JA É INTUITIVO
@@ -187,7 +187,7 @@ def coders_night():
         arquivo_algoritmos = open(os.path.join('Textos', 'algoritmos_textos.txt'), 'r')
         indice_linha_atual = 0  # para finalizar o jogo quando chegar no numero de linhas
         numero_linhas_arquivo = 0
-        numero_linhas_por_algoritmo = [9, 9, 22]
+        numero_linhas_por_algoritmo = [14, 9, 10]
         indice_linha_algoritmo_atual = 0
         numero_hashtags = 0
         linha_arquivo = arquivo_algoritmos.readline()
@@ -874,16 +874,14 @@ def coders_night():
                 # Verificando o pressionar das teclas
                 if event.type == pygame.KEYDOWN:
                     # Tomando café com tecla de atalho
-                    if (event.key == pygame.K_LSHIFT or event.type == pygame.K_RSHIFT) and largura_barra_energia <= 400:
+                    if (event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT) and largura_barra_energia <= 400:
                         largura_barra_energia += 350
                         drinking_sound.play()
                         xicara.stop_flutuar(posicao_xicara)
                         xicara_icone.stop_flutuar(posicao_xicara_icone)
                     if active:
-                        # if event.key == pygame.K_BACKSPACE:
-                        #    input_text = input_text[:-1]
                         # Se a fila estiver vazia, o jogador venceu o jogo
-                        if not minha_fila.vazia() and largura_input_texto < 415:
+                        if not minha_fila.vazia():
 
                             not_unicodes_especiais = event.key != pygame.K_LSHIFT and \
                                                      event.key != pygame.K_RSHIFT and event.key != pygame.K_CAPSLOCK \
