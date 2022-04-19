@@ -76,22 +76,18 @@ def coders_night():
 
     img_cerebro = pygame.image.load(os.path.join('Imagens', 'brain.png')).convert_alpha()
     img_cerebro = pygame.transform.scale(img_cerebro, (45, 45))
-    img_shift = pygame.image.load(os.path.join("Imagens", "shift_branco.png"))
-    img_shift = pygame.transform.scale(img_shift, (100, 100))
 
     # criando os objetos
     posicao_xicara = (1040, 463)
     posicao_xicara_icone = (75, 650)
     xicara = funcoes_classes_auxiliares.Xicara(tamanho=32 * 6, posicao_top_left=posicao_xicara)
     xicara_icone = funcoes_classes_auxiliares.Xicara(tamanho=32 * 2, posicao_top_left=posicao_xicara_icone)
-    shift_imagem = funcoes_classes_auxiliares.FiguraClicavel(img_shift, (1140, 430))
     cerebro = funcoes_classes_auxiliares.FiguraClicavel(img_cerebro, (80, 625))
 
     # Grupo para os sprites
     grupo_sprites_permanentes = pygame.sprite.Group()
     grupo_sprites_temporarios = pygame.sprite.Group()
     grupo_sprites_permanentes.add(xicara_icone, cerebro, xicara)
-    grupo_sprites_temporarios.add(shift_imagem)
 
     # clock
     clk: Clock = pygame.time.Clock()
@@ -213,9 +209,6 @@ def coders_night():
         delay_msg_final_jogo = 0.5
         timer_msg_final_jogo = delay_msg_final_jogo
 
-        # Controla a cor do algoritmo atual (trecho e borda da caixa)
-        cor_algoritmo_atual = -1
-
         # Este indice é utilizado para saber a partição atual da 'string' que já foi acertada
         indice_caractere_atual = 0
 
@@ -262,6 +255,10 @@ def coders_night():
         botao_sairr = pygame.Rect(650, 380, 200, 30)
 
         ja_tocou_som_botao_selecionado = [False, False]
+        delay_som_teclando_menu_final = 0.5
+        timer_som_teclando_menu_final = delay_som_teclando_menu_final
+        atraso_imprimir_msg = 0.2
+        atraso = True
 
         # Trabalhando na tela do menu final
         while tela_menu_final:
@@ -322,58 +319,79 @@ def coders_night():
             # Só vai ser mais lento pros tres pontinhos dramaticos da ultima msg de vitoria
             if imprimiu_msg_padrao_vitoria3:
                 timer_msg_final_jogo -= 0.05
+                timer_som_teclando_menu_final -= 0.05
             else:
-                timer_msg_final_jogo -= 0.5
+                timer_msg_final_jogo -= 0.4
+                timer_som_teclando_menu_final -= 0.15
 
             # Imprimindo textos para um final onde o jogador perde
             if final_jogo == 'derrota':
                 if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_derrota1:
                     timer_msg_final_jogo = delay_msg_final_jogo
+                    if atraso:
+                        atraso = False
+                        sleep(atraso_imprimir_msg)
                     particao_msg_padrao_derrota = msg_padrao_derrota[0:indice_msg_final_jogo]
                     msg_format_padrao_derrota1 = fonte_2.render(particao_msg_padrao_derrota, True, BLACK)
                     indice_msg_final_jogo += 1
                     if indice_msg_final_jogo > len(msg_padrao_derrota):
                         indice_msg_final_jogo = 0
                         imprimiu_msg_padrao_derrota1 = True
+                        atraso = True
 
                 if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_derrota2 and imprimiu_msg_padrao_derrota1:
                     timer_msg_final_jogo = delay_msg_final_jogo
+                    if atraso:
+                        atraso = False
+                        sleep(atraso_imprimir_msg)
                     particao_msg_padrao_derrota = msg_padrao_derrota2[0:indice_msg_final_jogo]
                     msg_format_padrao_derrota2 = fonte_2.render(particao_msg_padrao_derrota, True, BLACK)
                     indice_msg_final_jogo += 1
                     if indice_msg_final_jogo > len(msg_padrao_derrota2):
                         imprimiu_msg_padrao_derrota2 = True
                         indice_msg_final_jogo = 0
+                        atraso = True
 
                 # Msg personalizada -> final onde o jogador perde por errar muito caractere (barra concentracao <= 0)
                 if concentracao_final <= 0:
                     if timer_msg_final_jogo <= 0 and imprimiu_msg_padrao_derrota2 \
                             and not imprimiu_msg_derrota_concentracao:
                         timer_msg_final_jogo = delay_msg_final_jogo
+                        if atraso:
+                            atraso = False
+                            sleep(atraso_imprimir_msg)
                         particao_msg_padrao_derrota = msg_derrota_concentracao[0:indice_msg_final_jogo]
                         msg_format_derrota_concentracao = fonte_2.render(particao_msg_padrao_derrota, True, BLACK)
                         indice_msg_final_jogo += 1
                         if indice_msg_final_jogo > len(msg_derrota_concentracao):
                             imprimiu_msg_derrota_concentracao = True
                             indice_msg_final_jogo = 0
+                            atraso = True
 
                 # Msg personalizada -> final onde o jogador perde por não tomar café (barra energia <= 0)
                 if energia_final <= 0:
                     if timer_msg_final_jogo <= 0 and imprimiu_msg_padrao_derrota2 \
                             and not imprimiu_msg_derrota_energia:
                         timer_msg_final_jogo = delay_msg_final_jogo
+                        if atraso:
+                            atraso = False
+                            sleep(atraso_imprimir_msg)
                         particao_msg_padrao_derrota = msg_derrota_energia[0:indice_msg_final_jogo]
                         msg_format_derrota_energia = fonte_2.render(particao_msg_padrao_derrota, True, BLACK)
                         indice_msg_final_jogo += 1
                         if indice_msg_final_jogo > len(msg_derrota_energia):
                             imprimiu_msg_derrota_energia = True
                             indice_msg_final_jogo = 0
+                            atraso = True
 
                 # Imprimindo msg padrão final (que pena, está demitido)
                 if (imprimiu_msg_derrota_energia and not imprimiu_msg_padrao_derrota3) or \
                         (imprimiu_msg_derrota_concentracao and not imprimiu_msg_padrao_derrota3):
                     if timer_msg_final_jogo <= 0:
                         timer_msg_final_jogo = delay_msg_final_jogo
+                        if atraso:
+                            atraso = False
+                            sleep(atraso_imprimir_msg)
                         particao_msg_padrao_derrota = msg_padrao_derrota3[0:indice_msg_final_jogo]
                         msg_format_padrao_derrota3 = fonte_2.render(particao_msg_padrao_derrota, True, BLACK)
                         indice_msg_final_jogo += 1
@@ -381,6 +399,7 @@ def coders_night():
                         if indice_msg_final_jogo > len(msg_padrao_derrota3):
                             imprimiu_msg_padrao_derrota3 = True
                             indice_msg_final_jogo = 0
+                            atraso = True
 
                 tela_principal.blit(msg_format_padrao_derrota1, (380, 190))
                 tela_principal.blit(msg_format_padrao_derrota2, (380, 225))
@@ -393,39 +412,55 @@ def coders_night():
             elif final_jogo == 'vitoria':
                 if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_vitoria1:
                     timer_msg_final_jogo = delay_msg_final_jogo
+                    if atraso:
+                        atraso = False
+                        sleep(atraso_imprimir_msg)
                     particao_msg_padrao_vitoria = msg_vitoria1[0:indice_msg_final_jogo]
                     msg_format_padrao_vitoria1 = fonte_2.render(particao_msg_padrao_vitoria, True, BLACK)
                     indice_msg_final_jogo += 1
                     if indice_msg_final_jogo > len(msg_vitoria1):
                         indice_msg_final_jogo = 0
                         imprimiu_msg_padrao_vitoria1 = True
+                        atraso = True
 
                 if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_vitoria2:
                     timer_msg_final_jogo = delay_msg_final_jogo
+                    if atraso:
+                        atraso = False
+                        sleep(atraso_imprimir_msg)
                     particao_msg_padrao_vitoria = msg_vitoria2[0:indice_msg_final_jogo]
                     msg_format_padrao_vitoria2 = fonte_2.render(particao_msg_padrao_vitoria, True, BLACK)
                     indice_msg_final_jogo += 1
                     if indice_msg_final_jogo > len(msg_vitoria2):
                         indice_msg_final_jogo = 0
                         imprimiu_msg_padrao_vitoria2 = True
+                        atraso = True
 
                 if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_vitoria3:
                     timer_msg_final_jogo = delay_msg_final_jogo
+                    if atraso:
+                        atraso = False
+                        sleep(atraso_imprimir_msg)
                     particao_msg_padrao_vitoria = msg_vitoria3[0:indice_msg_final_jogo]
                     msg_format_padrao_vitoria3 = fonte_2.render(particao_msg_padrao_vitoria, True, BLACK)
                     indice_msg_final_jogo += 1
                     if indice_msg_final_jogo > len(msg_vitoria3):
                         indice_msg_final_jogo = 0
                         imprimiu_msg_padrao_vitoria3 = True
+                        atraso = True
 
                 if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_vitoria4:
                     timer_msg_final_jogo = delay_msg_final_jogo
+                    if atraso:
+                        atraso = False
+                        sleep(atraso_imprimir_msg)
                     particao_msg_padrao_vitoria = msg_vitoria4[0:indice_msg_final_jogo]
                     msg_format_padrao_vitoria4 = fonte_2.render(particao_msg_padrao_vitoria, True, BLACK)
                     indice_msg_final_jogo += 1
                     if indice_msg_final_jogo > len(msg_vitoria4):
                         indice_msg_final_jogo = 0
                         imprimiu_msg_padrao_vitoria4 = True
+                        atraso = True
 
                 tela_principal.blit(msg_format_padrao_vitoria1, (380, 190))
                 tela_principal.blit(msg_format_padrao_vitoria2, (380, 225))
@@ -441,6 +476,10 @@ def coders_night():
                         ja_tocou_som_botao_selecionado[indice] = True
                     if not botao and ja_tocou_som_botao_selecionado[indice]:
                         ja_tocou_som_botao_selecionado[indice] = False
+
+            if timer_som_teclando_menu_final <= 0 and not (imprimiu_msg_padrao_derrota3 or imprimiu_msg_padrao_vitoria4):
+                teclando.play()
+                timer_som_teclando_menu_final = delay_som_teclando_menu_final
 
             pygame.display.flip()
 
@@ -649,17 +688,17 @@ def coders_night():
 
         # Configurando dificuldade selecionada
         if escolheu_facil:
-            dano_acabou_tempo = 100
-            decremento_barra_energia = 0.5
-            delay_trecho_codigo = 25
+            dano_acabou_tempo = 60
+            decremento_barra_energia = 0.35
+            delay_trecho_codigo = 30
             timer_trecho_codigo = delay_trecho_codigo
         elif escolheu_medio:
-            dano_acabou_tempo = 150
+            dano_acabou_tempo = 100
             decremento_barra_energia = 1.0
-            delay_trecho_codigo = 20
+            delay_trecho_codigo = 25
             timer_trecho_codigo = delay_trecho_codigo
         elif escolheu_dificil:
-            dano_acabou_tempo = 200
+            dano_acabou_tempo = 150
             decremento_barra_energia = 1.5
             delay_trecho_codigo = 15
             timer_trecho_codigo = delay_trecho_codigo
@@ -672,6 +711,10 @@ def coders_night():
 
         # Limpando a tela
         tela_principal.fill(BLACK)
+
+        # Parando animação das xicaras caso na hora em que acabou estava ativa e o jogador voltou ao menu e recomeçou
+        xicara.stop_flutuar(posicao_xicara)
+        xicara_icone.stop_flutuar(posicao_xicara_icone)
 
         # Laço principal do jogo
         while not tela_menu_inicial and not tela_menu_final:
@@ -694,7 +737,6 @@ def coders_night():
                 # Condição de troca de algoritmo
                 if linha_arquivo_atual == '#':
                     indice_linha_algoritmo_atual = 0
-                    cor_algoritmo_atual += 1
                     linha_arquivo_atual = arquivo_algoritmos.readline()
                     linha_arquivo_atual = linha_arquivo_atual[:-1]
                     codigo_indice += 1
@@ -776,7 +818,6 @@ def coders_night():
             msg_format_algoritmo = fonte_1.render(msg_algoritmo, False, WHITE)
             msg_format_placeholder = fonte_2.render(msg_input_placeholder, False, (100, 100, 100))
             msg_format_input_text = fonte_2.render(input_text, False, BLACK)
-            largura_input_texto = msg_format_input_text.get_width()
             if timer_trecho_codigo <= 5.00:
                 cor_timer_perigo = RED
             else:
@@ -809,12 +850,10 @@ def coders_night():
                 xicara.flutuar(posicao_xicara)
                 xicara_icone.image.set_alpha(abs(sin(valor_seno_alfa_xicara) * 255))  # animando a xícara
                 xicara_icone.flutuar(posicao_xicara_icone)
-                shift_imagem.image.set_alpha(abs(sin(valor_seno_alfa_shft) * 255))  # animando o shift
                 valor_seno_alfa_xicara += 0.09
                 valor_seno_alfa_shft += 0.09
             else:
                 xicara_icone.image.set_alpha(255)
-                shift_imagem.image.set_alpha(255)
 
             # Tremendo a tela_principal quando o player erra um caractere:
             if screen_shake > 0:
@@ -873,12 +912,6 @@ def coders_night():
 
                 # Verificando o pressionar das teclas
                 if event.type == pygame.KEYDOWN:
-                    # Tomando café com tecla de atalho
-                    if (event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT) and largura_barra_energia <= 400:
-                        largura_barra_energia += 350
-                        drinking_sound.play()
-                        xicara.stop_flutuar(posicao_xicara)
-                        xicara_icone.stop_flutuar(posicao_xicara_icone)
                     if active:
                         # Se a fila estiver vazia, o jogador venceu o jogo
                         if not minha_fila.vazia():
