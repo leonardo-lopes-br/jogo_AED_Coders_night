@@ -159,6 +159,8 @@ def coders_night():
 
     final_jogo = 'derrota'
 
+    indice_dificuldade_selecionada_por_ultimo = 4
+
     # Daqui pra cima, as declarações são fixas, pra baixo começa o loop que reseta as variáveis
     # laço do jogo inteiro (começa com a tela inicial e depois entra no laço principal do jogo)
     while True:
@@ -297,7 +299,8 @@ def coders_night():
                 # Ativando ou não o botão de voltar
                 if botao_voltar.collidepoint(mouse):
                     botao_voltar_ativo = True
-                    if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.type == pygame.MOUSEBUTTONDOWN and (imprimiu_msg_padrao_derrota3 or
+                                                                 imprimiu_msg_padrao_vitoria4):
                         som_botao_clicado.play()
                         sleep(0.04)
                         tela_menu_inicial = True
@@ -307,7 +310,7 @@ def coders_night():
                 # Ativando ou não o botão de sair
                 if botao_sairr.collidepoint(mouse):
                     botao_sairr_ativo = True
-                    if event.type == MOUSEBUTTONDOWN:
+                    if event.type == MOUSEBUTTONDOWN and (imprimiu_msg_padrao_derrota3 or imprimiu_msg_padrao_vitoria4):
                         som_botao_clicado.play()
                         sleep(0.35)
                         pygame.quit()
@@ -501,13 +504,14 @@ def coders_night():
         botao_dificil_ativo = False
         botao_dificil = pygame.Rect(largura_janela / 2 - 65, altura_janela / 2 + 90, 160, 60)
 
-        escolheu_facil = False
-        escolheu_medio = True
-        escolheu_dificil = False
+        escolheu_facil = indice_dificuldade_selecionada_por_ultimo == 3
+        escolheu_medio = indice_dificuldade_selecionada_por_ultimo == 4
+        escolheu_dificil = indice_dificuldade_selecionada_por_ultimo == 5
 
         mostrar_dificuldades = False
 
-        ja_tocou_som_botao_selecionado = [False, False, False, False, True, False]
+        ja_tocou_som_botao_selecionado = [False, False, False, False, False, False]
+        ja_tocou_som_botao_selecionado[indice_dificuldade_selecionada_por_ultimo] = True
 
         # Limpando a tela
         tela_principal.fill(BLACK)
@@ -692,16 +696,19 @@ def coders_night():
             decremento_barra_energia = 0.35
             delay_trecho_codigo = 30
             timer_trecho_codigo = delay_trecho_codigo
+            indice_dificuldade_selecionada_por_ultimo = 3
         elif escolheu_medio:
             dano_acabou_tempo = 100
             decremento_barra_energia = 1.0
             delay_trecho_codigo = 25
             timer_trecho_codigo = delay_trecho_codigo
+            indice_dificuldade_selecionada_por_ultimo = 4
         elif escolheu_dificil:
             dano_acabou_tempo = 150
             decremento_barra_energia = 1.5
             delay_trecho_codigo = 15
             timer_trecho_codigo = delay_trecho_codigo
+            indice_dificuldade_selecionada_por_ultimo = 5
 
         # Resetando barra de progresso do algoritmo
         tamanho_barra_progresso = 0
