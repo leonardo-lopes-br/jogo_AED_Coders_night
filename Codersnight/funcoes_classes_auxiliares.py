@@ -65,9 +65,9 @@ def configura_cor_botao(ativo):
     return cor_botao, cor_texto
 
 
-def draw_rect_alpha(superficie, cor, retangulo):
+def draw_rect_alpha(superficie, cor, retangulo, width=0):
     shape_surf = pygame.Surface(pygame.Rect(retangulo).size, pygame.SRCALPHA)
-    pygame.draw.rect(shape_surf, cor, shape_surf.get_rect())
+    pygame.draw.rect(shape_surf, cor, shape_surf.get_rect(), width=width)
     superficie.blit(shape_surf, retangulo)
 
 

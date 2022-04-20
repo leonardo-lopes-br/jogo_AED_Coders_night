@@ -66,6 +66,12 @@ def coders_night():
     som_botao_clicado.set_volume(1)
     som_selecionando_botao = pygame.mixer.Sound(os.path.join('Sons', 'som_selecionando_botao.flac'))
     som_selecionando_botao.set_volume(0.3)
+    pc_iniciando1 = pygame.mixer.Sound(os.path.join('Sons', 'pc_iniciando1.mpeg'))
+    pc_iniciando1.set_volume(0.5)
+    pc_iniciando2 = pygame.mixer.Sound(os.path.join('Sons', 'pc_iniciando2.mpeg'))
+    pc_iniciando2.set_volume(0.5)
+    som_cadeira_rodinhas = pygame.mixer.Sound(os.path.join('Sons', 'arrastando_cadeira.mpeg'))
+    som_cadeira_rodinhas.set_volume(0.7)
 
     # definicao das fontes dos textos
     fonte_1 = pygame.font.SysFont('arial', 27, True, False)
@@ -87,7 +93,6 @@ def coders_night():
 
     # Grupo para os sprites
     grupo_sprites_permanentes = pygame.sprite.Group()
-    grupo_sprites_temporarios = pygame.sprite.Group()
     grupo_sprites_permanentes.add(xicara_icone, cerebro, xicara)
 
     # clock
@@ -117,7 +122,6 @@ def coders_night():
 
     # Animação da xícara de café
     valor_seno_alfa_xicara = 1.57  # para animar a xicara (ficar piscando com energia baixa)
-    valor_seno_alfa_shft = 0
 
     # Títulos dos algoritmos
     titulos_algoritmos = ['Numero primo', 'Progressão Aritmética', 'Fibonacci']
@@ -545,7 +549,6 @@ def coders_night():
 
         # Limpando a tela
         tela_principal.fill(BLACK)
-        acabou_de_entrar = True
         while tela_menu_inicial:
             tela_principal.blit(fundo_jogo, (0, 0))
 
@@ -580,15 +583,15 @@ def coders_night():
                                                  100, border_radius=100)
             # Contorno do botao de dificuldade
             pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 - 67, altura_janela / 2 - 142, 162, 82),
-                             3,  border_radius=100)
+                             3, border_radius=100)
 
             # Botão sair do jogo
             botao_sair = pygame.draw.rect(tela_principal, cor_botao_sair,
                                           (largura_janela / 2 + 128, altura_janela / 2 - 140, 160, 80),
-                                          100,  border_radius=100)
+                                          100, border_radius=100)
             # Contorno do botão de sair do jogo
             pygame.draw.rect(tela_principal, BLACK, (largura_janela / 2 + 126, altura_janela / 2 - 142, 162, 82),
-                             3,  border_radius=100)
+                             3, border_radius=100)
 
             # Textos
             msg_format_nome_jogo = fonte_titulo_jogo.render(msg_nome_jogo, True, WHITE)
@@ -662,16 +665,6 @@ def coders_night():
                         tela_menu_inicial = False
                         som_botao_clicado.play()
                         funcoes_classes_auxiliares.transicao_telas(tela_principal)
-                        if escolheu_facil:
-                            pygame.mixer.music.load(os.path.join('Sons', "musica_lofi.mp3"))
-                            pygame.mixer.music.set_volume(0.4)
-                        elif escolheu_medio:
-                            pygame.mixer.music.load(os.path.join('Sons', 'som_fundo_level2.mp3'))
-                            pygame.mixer.music.set_volume(0.15)
-                        elif escolheu_dificil:
-                            pygame.mixer.music.load(os.path.join('Sons', 'som_fundo_level3.mp3'))
-                            pygame.mixer.music.set_volume(0.15)
-                        pygame.mixer.music.play(-1)
                 else:
                     botao_iniciar_ativo = False
                 if botao_dificuldade.collidepoint(posicao_mouse):
@@ -729,24 +722,28 @@ def coders_night():
             # endregion
 
         # Configurando dificuldade selecionada
+        musica_tela_jogo = ''
         if escolheu_facil:
             dano_acabou_tempo = 60
             decremento_barra_energia = 0.35
             delay_trecho_codigo = 30
             timer_trecho_codigo = delay_trecho_codigo
             indice_dificuldade_selecionada_por_ultimo = 3
+            musica_tela_jogo = ['musica_lofi.mp3', 0.4]
         elif escolheu_medio:
             dano_acabou_tempo = 100
             decremento_barra_energia = 1.0
             delay_trecho_codigo = 25
             timer_trecho_codigo = delay_trecho_codigo
             indice_dificuldade_selecionada_por_ultimo = 4
+            musica_tela_jogo = ['som_fundo_level2.mp3', 0.15]
         elif escolheu_dificil:
             dano_acabou_tempo = 150
             decremento_barra_energia = 1.5
             delay_trecho_codigo = 15
             timer_trecho_codigo = delay_trecho_codigo
             indice_dificuldade_selecionada_por_ultimo = 5
+            musica_tela_jogo = ['som_fundo_level3.mp3', 0.15]
 
         # Resetando barra de progresso do algoritmo
         tamanho_barra_progresso = 0
@@ -754,12 +751,126 @@ def coders_night():
 
         tomou_dano_por_tempo = False
 
-        # Limpando a tela
-        tela_principal.fill(BLACK)
-
         # Parando animação das xicaras caso na hora em que acabou estava ativa e o jogador voltou ao menu e recomeçou
         xicara.stop_flutuar(posicao_xicara)
         xicara_icone.stop_flutuar(posicao_xicara_icone)
+
+        # Parando música da tela inicial
+        pygame.mixer.music.pause()
+
+        # Limpando a tela
+        tela_principal.fill(BLACK)
+
+        # Preparando tela do jogo principal (LEMBRA DE CONFIGURAR A MUSICA NO FINAL)
+        tela_jogo_preparada = False
+        terminou_som_pc_iniciando1 = terminou_som_pc_iniciando2 = terminou_som_cadeira_rodinhas = False
+        terminou_som_clicando_musica = False
+        # A cor do monitor no jogo é (60, 60, 200)
+        red_retangulo_tela_monitor = green_retangulo_tela_monitor = blue_retangulo_tela_monitor = 255
+
+        transparencia_inicial = 0
+
+        while not tela_jogo_preparada:
+            clk.tick(30)
+            tela_principal.blit(fundo_jogo, (0, 0))
+
+            # Retângulo principal (tela_principal central)
+            pygame.draw.rect(tela_principal, (red_retangulo_tela_monitor, green_retangulo_tela_monitor,
+                                              blue_retangulo_tela_monitor),
+                             (x_pos_caixa - 2, y_pos_caixa + 4, x_tam_caixa + 2, y_tam_caixa - 12))
+
+            # Desenhando barras de energia e concentração após pc iniciado
+            if terminou_som_pc_iniciando2:
+                # Barra de energia:
+                funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (0, 255, 0, transparencia_inicial),
+                                                           (x_pos_barra_energia, y_pos_barra_energia,
+                                                            largura_barra_energia, 25))
+                # Contorno barra energia
+                funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (255, 255, 255, transparencia_inicial),
+                                                           (x_pos_barra_energia - 2, y_pos_barra_energia - 2,
+                                                            largura_barra_energia + 2, 27), 3)
+
+                # Barra de concentração
+                funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (0, 255, 0, transparencia_inicial),
+                                                           (x_pos_barra_conc, y_pos_barra_conc,
+                                                            largura_barra_concentracao, 25))
+                # Contorno barra de concentração
+                funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (255, 255, 255, transparencia_inicial),
+                                                           (x_pos_barra_conc - 2, y_pos_barra_conc - 2,
+                                                            largura_barra_concentracao + 2, 27), 3)
+
+                # Input box
+                funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (255, 255, 255, transparencia_inicial),
+                                                           (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 35))
+                # Contorno da input box
+                funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (0, 0, 0, transparencia_inicial),
+                                                           (x_pos_caixa + 30, y_pos_caixa + 135, x_tam_caixa - 60, 35),
+                                                           3)
+
+                # Barra porcentagem
+                funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (255, 255, 255, transparencia_inicial),
+                                                           (x_pos_caixa + 40, y_pos_caixa + y_tam_caixa - 55,
+                                                            x_tam_caixa - 80, 20), 20)
+                # Contorno porcentagem
+                funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (0, 0, 0, transparencia_inicial),
+                                                           (x_pos_caixa + 38, y_pos_caixa + y_tam_caixa - 57,
+                                                            x_tam_caixa - 78, 22), 3)
+
+                msg_timer = f'Tempo: {timer_trecho_codigo:2.2f}'
+                msg_algoritmo = f'{titulos_algoritmos[0]}'
+
+                msg_format_texto_timer_safe = fonte_timer.render(msg_timer, False, WHITE)
+                msg_format_algoritmo = fonte_1.render(msg_algoritmo, False, WHITE)
+
+                tela_principal.blit(msg_format_texto_timer_safe, (1050, 25))
+                tela_principal.blit(msg_format_algoritmo,
+                                    (x_pos_caixa + (x_tam_caixa / 2) - msg_format_algoritmo.get_width() / 2,
+                                     y_pos_caixa + 20))
+
+                if not terminou_som_cadeira_rodinhas:
+                    som_cadeira_rodinhas.play()
+                    terminou_som_cadeira_rodinhas = True
+                if terminou_som_cadeira_rodinhas and not terminou_som_clicando_musica and not pygame.mixer.get_busy():
+                    sleep(0.4)
+                    terminou_som_clicando_musica = True
+                    teclando.set_volume(1)
+                    teclando.play()
+                if terminou_som_clicando_musica and not pygame.mixer.get_busy():
+                    teclando.set_volume(0.65)
+                    tela_jogo_preparada = True
+
+                # Colocando imagens na tela_principal
+                grupo_sprites_permanentes.draw(tela_principal)
+                grupo_sprites_permanentes.update()
+
+                if transparencia_inicial < 255:
+                    transparencia_inicial += 3
+
+            if blue_retangulo_tela_monitor > 200:
+                blue_retangulo_tela_monitor -= 1
+            if red_retangulo_tela_monitor > 60 and green_retangulo_tela_monitor > 60:
+                red_retangulo_tela_monitor -= 1.5
+                green_retangulo_tela_monitor -= 1.5
+
+            # Lidando com os sons de ligar o pc e de colocar musica pra tocar
+            if not terminou_som_pc_iniciando1:
+                pc_iniciando1.play()
+                terminou_som_pc_iniciando1 = True
+            elif terminou_som_pc_iniciando1 and not terminou_som_pc_iniciando2 and not pygame.mixer.get_busy():
+                pc_iniciando1.stop()
+                pc_iniciando2.play()
+                terminou_som_pc_iniciando2 = True
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+            pygame.display.flip()
+
+        pygame.mixer.music.load(os.path.join('Sons', musica_tela_jogo[0]))
+        pygame.mixer.music.set_volume(musica_tela_jogo[1])
+        pygame.mixer.music.play(-1)
 
         # Laço principal do jogo
         while not tela_menu_inicial and not tela_menu_final:
@@ -890,13 +1001,10 @@ def coders_night():
 
             # Animando a xicara de café quando a energia está baixa
             if largura_barra_energia <= 400:
-                grupo_sprites_temporarios.draw(tela_principal)
-                grupo_sprites_temporarios.update()
                 xicara.flutuar(posicao_xicara)
                 xicara_icone.image.set_alpha(abs(sin(valor_seno_alfa_xicara) * 255))  # animando a xícara
                 xicara_icone.flutuar(posicao_xicara_icone)
                 valor_seno_alfa_xicara += 0.09
-                valor_seno_alfa_shft += 0.09
             else:
                 xicara_icone.image.set_alpha(255)
 
