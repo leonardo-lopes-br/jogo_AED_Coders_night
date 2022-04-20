@@ -766,7 +766,7 @@ def coders_night():
         terminou_som_pc_iniciando1 = terminou_som_pc_iniciando2 = terminou_som_cadeira_rodinhas = False
         terminou_som_clicando_musica = False
         # A cor do monitor no jogo é (60, 60, 200)
-        red_retangulo_tela_monitor = green_retangulo_tela_monitor = blue_retangulo_tela_monitor = 255
+        red_retangulo_tela_monitor = green_retangulo_tela_monitor = blue_retangulo_tela_monitor = 0
 
         transparencia_inicial = 0
 
@@ -846,11 +846,11 @@ def coders_night():
                 if transparencia_inicial < 255:
                     transparencia_inicial += 3
 
-            if blue_retangulo_tela_monitor > 200:
-                blue_retangulo_tela_monitor -= 1
-            if red_retangulo_tela_monitor > 60 and green_retangulo_tela_monitor > 60:
-                red_retangulo_tela_monitor -= 1.5
-                green_retangulo_tela_monitor -= 1.5
+            if blue_retangulo_tela_monitor < 200:
+                blue_retangulo_tela_monitor += 4
+            if red_retangulo_tela_monitor < 60 and green_retangulo_tela_monitor < 60:
+                red_retangulo_tela_monitor += 1.5
+                green_retangulo_tela_monitor += 1.5
 
             # Lidando com os sons de ligar o pc e de colocar musica pra tocar
             if not terminou_som_pc_iniciando1:
