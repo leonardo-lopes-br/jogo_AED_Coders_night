@@ -1,3 +1,5 @@
+import pygame.time
+
 from coders_night import *
 
 # Cores
@@ -61,6 +63,23 @@ def configura_cor_botao(ativo):
         cor_botao = (210, 210, 210)
         cor_texto = BLACK
     return cor_botao, cor_texto
+
+
+def draw_rect_alpha(superficie, cor, retangulo):
+    shape_surf = pygame.Surface(pygame.Rect(retangulo).size, pygame.SRCALPHA)
+    pygame.draw.rect(shape_surf, cor, shape_surf.get_rect())
+    superficie.blit(shape_surf, retangulo)
+
+
+def transicao_telas(superficie):
+    alfa_transicao = 0
+    clock = pygame.time.Clock()
+    # Escurecendo a tela
+    while alfa_transicao < 190:
+        clock.tick(25)
+        draw_rect_alpha(superficie, (0, 0, 0, alfa_transicao), (0, 0, 1280, 720))
+        alfa_transicao += 10
+        pygame.display.flip()
 
 
 
