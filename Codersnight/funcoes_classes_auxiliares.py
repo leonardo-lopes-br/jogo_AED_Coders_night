@@ -1,5 +1,4 @@
 import pygame.time
-
 from coders_night import *
 
 # Cores
@@ -20,13 +19,13 @@ class Xicara(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.sprites = []
         self.tamanho = tamanho
-        self.sprites.append(pygame.image.load('Imagens/Coffe empty.png'))
-        self.sprites.append(pygame.image.load('Imagens/coffe_fully1.png'))
-        self.sprites.append(pygame.image.load('Imagens/coffe_fully2.png'))
-        self.sprites.append(pygame.image.load('Imagens/coffe_fully3.png'))
-        self.sprites.append(pygame.image.load('Imagens/coffe_fully4.png'))
-        self.sprites.append(pygame.image.load('Imagens/coffe_fully5.png'))
-        self.sprites.append(pygame.image.load('Imagens/coffe_fully6.png'))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'Coffe empty.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'coffe_fully1.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'coffe_fully2.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'coffe_fully3.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'coffe_fully4.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'coffe_fully5.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'coffe_fully6.png')))
         self.vazia = 0
         self.atual = 1
         self.image = self.sprites[self.vazia]
@@ -49,6 +48,82 @@ class Xicara(pygame.sprite.Sprite):
     def update(self):
         if self.animar:
             self.atual = self.atual + 0.25
+            if self.atual >= len(self.sprites):
+                self.atual = 1
+            self.image = self.sprites[int(self.atual)]
+            self.image = pygame.transform.scale(self.image, (self.tamanho, self.tamanho))
+
+
+class Moon(pygame.sprite.Sprite):
+    def __init__(self, tamanho, posicao_top_left):
+        pygame.sprite.Sprite.__init__(self)
+        self.sprites = []
+        self.posicao = posicao_top_left
+        self.tamanho = tamanho
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'sprite_moon0.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'sprite_moon1.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'sprite_moon2.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'sprite_moon3.png')))
+        self.vazia = 0
+        self.atual = 1
+        self.image = self.sprites[self.vazia]
+        self.image = pygame.transform.scale(self.image, (tamanho, tamanho))
+
+        self.rect = self.image.get_rect()
+        self.rect.topleft = posicao_top_left
+        self.animar = False
+
+    def Animar(self):
+        self.rect.topleft = self.posicao
+        self.animar = True
+
+    def Stop_Animar(self):
+        self.rect.topleft = self.posicao
+        self.animar = False
+        self.image = self.sprites[self.vazia]
+        self.image = pygame.transform.scale(self.image, (self.tamanho, self.tamanho))
+
+    def update(self):
+        if self.animar:
+            self.atual = self.atual + 0.05
+            if self.atual >= len(self.sprites):
+                self.atual = 1
+            self.image = self.sprites[int(self.atual)]
+            self.image = pygame.transform.scale(self.image, (self.tamanho, self.tamanho))
+
+
+class Star(pygame.sprite.Sprite):
+    def __init__(self, tamanho, posicao_top_left):
+        pygame.sprite.Sprite.__init__(self)
+        self.posicao = posicao_top_left
+        self.sprites = []
+        self.tamanho = tamanho
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'sprite_star0.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'sprite_star1.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'sprite_star2.png')))
+        self.sprites.append(pygame.image.load(os.path.join('Imagens', 'sprite_star3.png')))
+        self.vazia = 0
+        self.atual = 1
+        self.image = self.sprites[self.vazia]
+        self.image = pygame.transform.scale(self.image, (tamanho, tamanho))
+
+        self.rect = self.image.get_rect()
+        self.rect.topleft = posicao_top_left
+        self.animar = False
+
+    def Animar(self):
+        self.rect.topleft = self.posicao
+        self.animar = True
+
+    def Stop_Animar(self):
+        self.rect.topleft = self.posicao
+        self.animar = False
+        self.image = self.sprites[self.vazia]
+        self.image = pygame.transform.scale(self.image, (self.tamanho, self.tamanho))
+
+    def update(self):
+        if self.animar:
+            self.atual = self.atual + 0.05
             if self.atual >= len(self.sprites):
                 self.atual = 1
             self.image = self.sprites[int(self.atual)]
@@ -80,6 +155,3 @@ def transicao_telas(superficie):
         draw_rect_alpha(superficie, (0, 0, 0, alfa_transicao), (0, 0, 1280, 720))
         alfa_transicao += 10
         pygame.display.flip()
-
-
-

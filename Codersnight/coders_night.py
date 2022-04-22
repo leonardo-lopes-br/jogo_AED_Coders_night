@@ -85,15 +85,27 @@ def coders_night():
     img_cerebro = pygame.transform.scale(img_cerebro, (45, 45))
 
     # criando os objetos
-    posicao_xicara = (1040, 463)
+    posicao_lua = (-70, -40)
+    posicao_estrela_0 = (140, 45)
+    posicao_estrela_1 = (20, 260)
+    posicao_estrela_2 = (100, 240)
+    posicao_estrela_3 = (70, 370)
+    posicao_xicara = (980, 463)
     posicao_xicara_icone = (75, 650)
     xicara = funcoes_classes_auxiliares.Xicara(tamanho=32 * 6, posicao_top_left=posicao_xicara)
     xicara_icone = funcoes_classes_auxiliares.Xicara(tamanho=32 * 2, posicao_top_left=posicao_xicara_icone)
     cerebro = funcoes_classes_auxiliares.FiguraClicavel(img_cerebro, (80, 625))
+    lua = funcoes_classes_auxiliares.Moon(tamanho=32 * 12, posicao_top_left=posicao_lua)
+    estrela_0 = funcoes_classes_auxiliares.Star(tamanho=32 * 6, posicao_top_left=posicao_estrela_0)
+    estrela_1 = funcoes_classes_auxiliares.Star(tamanho=32 * 6, posicao_top_left=posicao_estrela_1)
+    estrela_2 = funcoes_classes_auxiliares.Star(tamanho=32 * 6, posicao_top_left=posicao_estrela_2)
+    estrela_3 = funcoes_classes_auxiliares.Star(tamanho=32 * 6, posicao_top_left=posicao_estrela_3)
 
     # Grupo para os sprites
     grupo_sprites_permanentes = pygame.sprite.Group()
     grupo_sprites_permanentes.add(xicara_icone, cerebro, xicara)
+    grupo_sprites_janela = pygame.sprite.Group()
+    grupo_sprites_janela.add(lua, estrela_0, estrela_1, estrela_2, estrela_3)
 
     # clock
     clk: Clock = pygame.time.Clock()
@@ -104,7 +116,7 @@ def coders_night():
     dano_acabou_tempo = 150
 
     # dimensoes das barras
-    largura_max = 1000
+    largura_max = 700
     largura_barra_energia = largura_max
     largura_barra_concentracao = largura_max
 
@@ -118,7 +130,7 @@ def coders_night():
     x_tam_caixa = 575
     y_tam_caixa = 270
     x_pos_caixa = (largura_janela / 2 - x_tam_caixa / 2) + 17
-    y_pos_caixa = (altura_janela / 2 - y_tam_caixa / 2) - 70
+    y_pos_caixa = (altura_janela / 2 - y_tam_caixa / 2) - 117
 
     # Animação da xícara de café
     valor_seno_alfa_xicara = 1.57  # para animar a xicara (ficar piscando com energia baixa)
@@ -258,8 +270,8 @@ def coders_night():
                 som_jogador_ganhou.play()
 
         botao_voltar_ativo = botao_sairr_ativo = False
-        botao_voltar = pygame.Rect(650, 345, 200, 30)
-        botao_sairr = pygame.Rect(650, 380, 200, 30)
+        botao_voltar = pygame.Rect(650, 290, 180, 30)
+        botao_sairr = pygame.Rect(650, 325, 180, 30)
 
         ja_tocou_som_botao_selecionado = [False, False]
         delay_som_teclando_menu_final = 0.5
@@ -267,6 +279,12 @@ def coders_night():
         atraso_imprimir_msg = 0.2
         atraso = True
         pular_escrita = False
+
+        lua.Stop_Animar()
+        estrela_0.Stop_Animar()
+        estrela_1.Stop_Animar()
+        estrela_2.Stop_Animar()
+        estrela_3.Stop_Animar()
 
         # Trabalhando na tela do menu final
         while tela_menu_final:
@@ -280,21 +298,25 @@ def coders_night():
             msg_format_botao_voltar = fonte_2.render(msg_voltar_menu, True, cor_texto_botao_voltar)
             msg_format_botao_sairr = fonte_2.render(msg_botao_sairr, True, cor_texto_botao_sairr)
 
+            # Desenhando estrelas e lua
+            grupo_sprites_janela.draw(tela_principal)
+            grupo_sprites_janela.update()
+
             # Incluindo botões de voltar ao menu ou de sair do jogo independente do final
             if imprimiu_msg_padrao_derrota3 or imprimiu_msg_padrao_vitoria4:
                 # Desenhando o botão de voltar ao menu
                 pygame.draw.rect(tela_principal, cor_botao_voltar, botao_voltar, border_radius=100)
                 # Desenhando o contorno do botão de voltar ao menu
-                pygame.draw.rect(tela_principal, BLACK, (648, 343, 202, 32), 3, border_radius=100)
+                pygame.draw.rect(tela_principal, BLACK, (648, 288, 182, 32), 3, border_radius=100)
 
                 # Desenhando o botão de sair do jogo
                 pygame.draw.rect(tela_principal, cor_botao_sairr, botao_sairr, border_radius=100)
                 # Desenhando o contorno do botão de sair do jogo
-                pygame.draw.rect(tela_principal, BLACK, (648, 378, 202, 32), 3, border_radius=100)
+                pygame.draw.rect(tela_principal, BLACK, (648, 323, 182, 32), 3, border_radius=100)
 
                 # Desenhando o texto do botão de voltar ao menu
-                tela_principal.blit(msg_format_botao_voltar, (665, 348, 100, 30))
-                tela_principal.blit(msg_format_botao_sairr, (685, 382, 100, 30))
+                tela_principal.blit(msg_format_botao_voltar, (660, 291, 100, 30))
+                tela_principal.blit(msg_format_botao_sairr, (675, 327, 100, 30))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -326,7 +348,7 @@ def coders_night():
                     botao_sairr_ativo = False
 
                 # Pulando a digitação da mensagem final se o usuário clicar na tela antes delas acabarem
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
                     if not (imprimiu_msg_padrao_derrota3 or imprimiu_msg_padrao_vitoria4):
                         pular_escrita = True
 
@@ -429,13 +451,13 @@ def coders_night():
                             indice_msg_final_jogo = 0
                             atraso = True
 
-                tela_principal.blit(msg_format_padrao_derrota1, (380, 190))
-                tela_principal.blit(msg_format_padrao_derrota2, (380, 225))
+                tela_principal.blit(msg_format_padrao_derrota1, (380, 130))
+                tela_principal.blit(msg_format_padrao_derrota2, (380, 165))
                 if energia_final <= 0:
-                    tela_principal.blit(msg_format_derrota_energia, (380, 300))
+                    tela_principal.blit(msg_format_derrota_energia, (380, 250))
                 elif concentracao_final <= 0:
-                    tela_principal.blit(msg_format_derrota_concentracao, (380, 300))
-                tela_principal.blit(msg_format_padrao_derrota3, (380, 350))
+                    tela_principal.blit(msg_format_derrota_concentracao, (380, 250))
+                tela_principal.blit(msg_format_padrao_derrota3, (380, 285))
 
             elif final_jogo == 'vitoria':
                 if timer_msg_final_jogo <= 0 and not imprimiu_msg_padrao_vitoria1:
@@ -498,10 +520,10 @@ def coders_night():
                         imprimiu_msg_padrao_vitoria4 = True
                         atraso = True
 
-                tela_principal.blit(msg_format_padrao_vitoria1, (380, 190))
-                tela_principal.blit(msg_format_padrao_vitoria2, (380, 225))
-                tela_principal.blit(msg_format_padrao_vitoria3, (380, 300))
-                tela_principal.blit(msg_format_padrao_vitoria4, (828, 300))
+                tela_principal.blit(msg_format_padrao_vitoria1, (380, 130))
+                tela_principal.blit(msg_format_padrao_vitoria2, (380, 165))
+                tela_principal.blit(msg_format_padrao_vitoria3, (380, 250))
+                tela_principal.blit(msg_format_padrao_vitoria4, (828, 250))
 
             # som de botao selecionado
             lista_booleans_botoes = [botao_voltar_ativo, botao_sairr_ativo]
@@ -564,6 +586,10 @@ def coders_night():
                 botao_dificil_ativo)
 
             # region Trabalhando o menu inicial do jogo
+
+            # lua e estrelas
+            grupo_sprites_janela.draw(tela_principal)
+            grupo_sprites_janela.update()
 
             # Retângulo principal com as opções
             pygame.draw.rect(tela_principal, (60, 60, 200),
@@ -784,20 +810,20 @@ def coders_night():
                 # Barra de energia:
                 funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (0, 255, 0, transparencia_inicial),
                                                            (x_pos_barra_energia, y_pos_barra_energia,
-                                                            largura_barra_energia, 25))
+                                                            largura_barra_energia, 10))
                 # Contorno barra energia
                 funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (255, 255, 255, transparencia_inicial),
                                                            (x_pos_barra_energia - 2, y_pos_barra_energia - 2,
-                                                            largura_barra_energia + 2, 27), 3)
+                                                            largura_barra_energia + 2, 15), 3)
 
                 # Barra de concentração
                 funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (0, 255, 0, transparencia_inicial),
                                                            (x_pos_barra_conc, y_pos_barra_conc,
-                                                            largura_barra_concentracao, 25))
+                                                            largura_barra_concentracao, 10))
                 # Contorno barra de concentração
                 funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (255, 255, 255, transparencia_inicial),
                                                            (x_pos_barra_conc - 2, y_pos_barra_conc - 2,
-                                                            largura_barra_concentracao + 2, 27), 3)
+                                                            largura_barra_concentracao + 2, 15), 3)
 
                 # Input box
                 funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (255, 255, 255, transparencia_inicial),
@@ -815,6 +841,9 @@ def coders_night():
                 funcoes_classes_auxiliares.draw_rect_alpha(tela_principal, (0, 0, 0, transparencia_inicial),
                                                            (x_pos_caixa + 38, y_pos_caixa + y_tam_caixa - 57,
                                                             x_tam_caixa - 78, 22), 3)
+
+                grupo_sprites_permanentes.draw(tela_principal)
+                grupo_sprites_permanentes.update()
 
                 msg_timer = f'Tempo: {timer_trecho_codigo:2.2f}'
                 msg_algoritmo = f'{titulos_algoritmos[0]}'
@@ -839,12 +868,12 @@ def coders_night():
                     teclando.set_volume(0.65)
                     tela_jogo_preparada = True
 
-                # Colocando imagens na tela_principal
-                grupo_sprites_permanentes.draw(tela_principal)
-                grupo_sprites_permanentes.update()
-
                 if transparencia_inicial < 255:
                     transparencia_inicial += 3
+
+            # Colocando imagens na tela_principal
+            grupo_sprites_janela.draw(tela_principal)
+            grupo_sprites_janela.update()
 
             if blue_retangulo_tela_monitor < 200:
                 blue_retangulo_tela_monitor += 4
@@ -907,16 +936,16 @@ def coders_night():
             # Barra de energia:
             pygame.draw.rect(tela_principal, (red_barra_energia, green_barra_energia, 0), (x_pos_barra_energia,
                                                                                            y_pos_barra_energia,
-                                                                                           largura_barra_energia, 25))
+                                                                                           largura_barra_energia, 10))
             # Contorno da barra de energia
             pygame.draw.rect(tela_principal, WHITE, (x_pos_barra_energia - 2, y_pos_barra_energia - 2,
-                                                     largura_barra_energia + 2, 27), 3)
+                                                     largura_barra_energia + 2, 15), 3)
             # Barra de concentracao:
             pygame.draw.rect(tela_principal, (red_barra_concentracao, green_barra_concentracao, 0),
-                             (x_pos_barra_conc, y_pos_barra_conc, largura_barra_concentracao, 25))
+                             (x_pos_barra_conc, y_pos_barra_conc, largura_barra_concentracao, 10))
             # Contorno da barra de concentração
             pygame.draw.rect(tela_principal, WHITE, (x_pos_barra_conc - 2, y_pos_barra_conc - 2,
-                                                     largura_barra_concentracao + 2, 27), 3)
+                                                     largura_barra_concentracao + 2, 15), 3)
 
             # Porcentagem para controlar a cor das barras (energia e concentração)
             barra_energia_porcentagem = largura_barra_energia / largura_max
@@ -998,6 +1027,8 @@ def coders_night():
             # Colocando imagens na tela_principal (xicaras e cerebro)
             grupo_sprites_permanentes.draw(tela_principal)
             grupo_sprites_permanentes.update()
+            grupo_sprites_janela.draw(tela_principal)
+            grupo_sprites_janela.update()
 
             # Animando a xicara de café quando a energia está baixa
             if largura_barra_energia <= 400:
@@ -1007,6 +1038,13 @@ def coders_night():
                 valor_seno_alfa_xicara += 0.09
             else:
                 xicara_icone.image.set_alpha(255)
+
+            # Animando as estrelas e a lua
+            lua.Animar()
+            estrela_0.Animar()
+            estrela_1.Animar()
+            estrela_2.Animar()
+            estrela_3.Animar()
 
             # Tremendo a tela_principal quando o player erra um caractere:
             if screen_shake > 0:
@@ -1045,13 +1083,13 @@ def coders_night():
                     # Recuperando energia ao clicar na xicara
                     if largura_barra_energia <= 400:
                         if xicara.rect.collidepoint(pos):
-                            largura_barra_energia += 350
+                            largura_barra_energia += 250
                             drinking_sound.play()
                             xicara.stop_flutuar(posicao_xicara)
                             xicara_icone.stop_flutuar(posicao_xicara_icone)
 
                         if xicara_icone.rect.collidepoint(pos):
-                            largura_barra_energia += 350
+                            largura_barra_energia += 250
                             drinking_sound.play()
                             xicara.stop_flutuar(posicao_xicara)
                             xicara_icone.stop_flutuar(posicao_xicara_icone)
