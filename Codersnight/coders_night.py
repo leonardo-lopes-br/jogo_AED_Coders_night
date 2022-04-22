@@ -11,7 +11,6 @@ from pygame.time import Clock
 
 import fila
 import funcoes_classes_auxiliares
-from math import sin
 from random import randint
 # altera o caminho do terminal para o caminho do arquivo
 import os
@@ -82,7 +81,11 @@ def coders_night():
     # imagens
 
     img_cerebro = pygame.image.load(os.path.join('Imagens', 'brain.png')).convert_alpha()
-    img_cerebro = pygame.transform.scale(img_cerebro, (45, 45))
+    img_cerebro = pygame.transform.scale(img_cerebro, (30, 30))
+
+    img_energia = pygame.image.load(os.path.join('Imagens', 'icone_energia.png'))
+    img_energia = pygame.transform.scale(img_energia, (30, 30))
+    img_energia = pygame.transform.flip(img_energia, True, False)
 
     # criando os objetos
     posicao_lua = (-70, -40)
@@ -91,10 +94,11 @@ def coders_night():
     posicao_estrela_2 = (100, 240)
     posicao_estrela_3 = (70, 370)
     posicao_xicara = (980, 463)
-    posicao_xicara_icone = (75, 650)
+
     xicara = funcoes_classes_auxiliares.Xicara(tamanho=32 * 6, posicao_top_left=posicao_xicara)
-    xicara_icone = funcoes_classes_auxiliares.Xicara(tamanho=32 * 2, posicao_top_left=posicao_xicara_icone)
-    cerebro = funcoes_classes_auxiliares.FiguraClicavel(img_cerebro, (80, 625))
+    cerebro = funcoes_classes_auxiliares.FiguraClicavel(img_cerebro, (80, 620))
+    energia = funcoes_classes_auxiliares.FiguraClicavel(img_energia, (80, 670))
+
     lua = funcoes_classes_auxiliares.Moon(tamanho=32 * 12, posicao_top_left=posicao_lua)
     estrela_0 = funcoes_classes_auxiliares.Star(tamanho=32 * 6, posicao_top_left=posicao_estrela_0)
     estrela_1 = funcoes_classes_auxiliares.Star(tamanho=32 * 6, posicao_top_left=posicao_estrela_1)
@@ -103,7 +107,7 @@ def coders_night():
 
     # Grupo para os sprites
     grupo_sprites_permanentes = pygame.sprite.Group()
-    grupo_sprites_permanentes.add(xicara_icone, cerebro, xicara)
+    grupo_sprites_permanentes.add(cerebro, xicara, energia)
     grupo_sprites_janela = pygame.sprite.Group()
     grupo_sprites_janela.add(lua, estrela_0, estrela_1, estrela_2, estrela_3)
 
@@ -131,9 +135,6 @@ def coders_night():
     y_tam_caixa = 270
     x_pos_caixa = (largura_janela / 2 - x_tam_caixa / 2) + 17
     y_pos_caixa = (altura_janela / 2 - y_tam_caixa / 2) - 117
-
-    # Animação da xícara de café
-    valor_seno_alfa_xicara = 1.57  # para animar a xicara (ficar piscando com energia baixa)
 
     # Títulos dos algoritmos
     titulos_algoritmos = ['Numero primo', 'Progressão Aritmética', 'Fibonacci']
@@ -779,7 +780,6 @@ def coders_night():
 
         # Parando animação das xicaras caso na hora em que acabou estava ativa e o jogador voltou ao menu e recomeçou
         xicara.stop_flutuar(posicao_xicara)
-        xicara_icone.stop_flutuar(posicao_xicara_icone)
 
         # Parando música da tela inicial
         pygame.mixer.music.pause()
@@ -1033,11 +1033,6 @@ def coders_night():
             # Animando a xicara de café quando a energia está baixa
             if largura_barra_energia <= 400:
                 xicara.flutuar(posicao_xicara)
-                xicara_icone.image.set_alpha(abs(sin(valor_seno_alfa_xicara) * 255))  # animando a xícara
-                xicara_icone.flutuar(posicao_xicara_icone)
-                valor_seno_alfa_xicara += 0.09
-            else:
-                xicara_icone.image.set_alpha(255)
 
             # Animando as estrelas e a lua
             lua.Animar()
@@ -1086,13 +1081,7 @@ def coders_night():
                             largura_barra_energia += 250
                             drinking_sound.play()
                             xicara.stop_flutuar(posicao_xicara)
-                            xicara_icone.stop_flutuar(posicao_xicara_icone)
 
-                        if xicara_icone.rect.collidepoint(pos):
-                            largura_barra_energia += 250
-                            drinking_sound.play()
-                            xicara.stop_flutuar(posicao_xicara)
-                            xicara_icone.stop_flutuar(posicao_xicara_icone)
                     # Se o usuário clicar na caixa de texto, ativá-la. Se clicar fora da caixa, desativá-la
                     if input_texto_box.collidepoint(pos):
                         active = True
