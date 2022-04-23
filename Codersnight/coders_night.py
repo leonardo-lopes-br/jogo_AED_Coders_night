@@ -225,6 +225,8 @@ def coders_night():
         concentracao_final = largura_barra_concentracao
         largura_barra_energia = largura_barra_concentracao = largura_max
 
+        energia_baixa = 280
+
         # Resetando timer da msg de fim de jogo
         delay_msg_final_jogo = 0.5
         timer_msg_final_jogo = delay_msg_final_jogo
@@ -759,15 +761,15 @@ def coders_night():
             musica_tela_jogo = ['musica_lofi.mp3', 0.4]
         elif escolheu_medio:
             dano_acabou_tempo = 100
-            decremento_barra_energia = 1.0
+            decremento_barra_energia = 0.75
             delay_trecho_codigo = 25
             timer_trecho_codigo = delay_trecho_codigo
             indice_dificuldade_selecionada_por_ultimo = 4
             musica_tela_jogo = ['som_fundo_level2.mp3', 0.15]
         elif escolheu_dificil:
-            dano_acabou_tempo = 150
-            decremento_barra_energia = 1.5
-            delay_trecho_codigo = 15
+            dano_acabou_tempo = 100
+            decremento_barra_energia = 1.0
+            delay_trecho_codigo = 20
             timer_trecho_codigo = delay_trecho_codigo
             indice_dificuldade_selecionada_por_ultimo = 5
             musica_tela_jogo = ['som_fundo_level3.mp3', 0.15]
@@ -1031,7 +1033,7 @@ def coders_night():
             grupo_sprites_janela.update()
 
             # Animando a xicara de café quando a energia está baixa
-            if largura_barra_energia <= 400:
+            if largura_barra_energia <= energia_baixa:
                 xicara.flutuar(posicao_xicara)
 
             # Animando as estrelas e a lua
@@ -1076,9 +1078,9 @@ def coders_night():
                 if event.type == MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
                     # Recuperando energia ao clicar na xicara
-                    if largura_barra_energia <= 400:
+                    if largura_barra_energia <= energia_baixa:
                         if xicara.rect.collidepoint(pos):
-                            largura_barra_energia += 250
+                            largura_barra_energia += 380
                             drinking_sound.play()
                             xicara.stop_flutuar(posicao_xicara)
 
