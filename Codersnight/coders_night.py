@@ -81,11 +81,10 @@ def coders_night():
     # imagens
 
     life_icon = pygame.image.load(os.path.join('Imagens', 'life_icon.png')).convert_alpha()
-    life_icon = pygame.transform.scale(life_icon, (30, 30))
+    life_icon = pygame.transform.scale(life_icon, (40, 40))
 
     energy_icon = pygame.image.load(os.path.join('Imagens', 'energy_icon.png'))
-    energy_icon = pygame.transform.scale(energy_icon, (30, 30))
-    energy_icon = pygame.transform.flip(energy_icon, True, False)
+    energy_icon = pygame.transform.scale(energy_icon, (40, 40))
 
     # criando os objetos
     posicao_lua = (-70, -40)
@@ -97,8 +96,8 @@ def coders_night():
     posicao_xicara = (980, 463)
 
     xicara = funcoes_classes_auxiliares.Xicara(tamanho=32 * 6, posicao_top_left=posicao_xicara)
-    life_icon = funcoes_classes_auxiliares.FiguraClicavel((life_icon), (80, 620))
-    energy_icon = funcoes_classes_auxiliares.FiguraClicavel((energy_icon), (80, 670))
+    life_icon = funcoes_classes_auxiliares.FiguraClicavel(life_icon, (80, 620))
+    energy_icon = funcoes_classes_auxiliares.FiguraClicavel(energy_icon, (81, 673))
 
     lua = funcoes_classes_auxiliares.Moon(tamanho=32 * 12, posicao_top_left=posicao_lua)
     estrela_0 = funcoes_classes_auxiliares.Star(tamanho=32 * 6, posicao_top_left=posicao_estrela_0)
@@ -117,9 +116,9 @@ def coders_night():
     clk: Clock = pygame.time.Clock()
 
     # Configurações de dificuldade
-    decremento_barra_energia = 1.0
-    delay_trecho_codigo = 15
-    dano_acabou_tempo = 150
+    decremento_barra_energia = 0.75
+    delay_trecho_codigo = 25
+    dano_acabou_tempo = 100
 
     # dimensoes das barras
     largura_max = 700
