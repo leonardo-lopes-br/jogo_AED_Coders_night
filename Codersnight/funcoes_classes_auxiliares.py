@@ -71,20 +71,20 @@ class Moon(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.topleft = posicao_top_left
-        self.animar = False
+        self.animar_bool = False
 
-    def Animar(self):
+    def animar(self):
         self.rect.topleft = self.posicao
-        self.animar = True
+        self.animar_bool = True
 
-    def Stop_Animar(self):
+    def stop_animar(self):
         self.rect.topleft = self.posicao
-        self.animar = False
+        self.animar_bool = False
         self.image = self.sprites[self.vazia]
         self.image = pygame.transform.scale(self.image, (self.tamanho, self.tamanho))
 
     def update(self):
-        if self.animar:
+        if self.animar_bool:
             self.atual = self.atual + 0.05
             if self.atual >= len(self.sprites):
                 self.atual = 1
@@ -109,20 +109,20 @@ class Star(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.topleft = posicao_top_left
-        self.animar = False
+        self.animar_bool = False
 
-    def Animar(self):
+    def animar(self):
         self.rect.topleft = self.posicao
-        self.animar = True
+        self.animar_bool = True
 
-    def Stop_Animar(self):
+    def stop_animar(self):
         self.rect.topleft = self.posicao
-        self.animar = False
+        self.animar_bool = False
         self.image = self.sprites[self.vazia]
         self.image = pygame.transform.scale(self.image, (self.tamanho, self.tamanho))
 
     def update(self):
-        if self.animar:
+        if self.animar_bool:
             self.atual = self.atual + 0.05
             if self.atual >= len(self.sprites):
                 self.atual = 1

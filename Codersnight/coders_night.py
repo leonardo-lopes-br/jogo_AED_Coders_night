@@ -16,12 +16,6 @@ from random import randint
 import os
 
 
-# NUMERO DE LINHAS DOS ALGORITMOS
-# NUMERO PRIMO: 14
-# PA: 9
-# FIBONACCI: 10
-
-
 def coders_night():
     # region inicializacao de dados que não se alteram
     # inicializacao da library do pygame
@@ -245,8 +239,6 @@ def coders_night():
         # Timer para digitar o trecho de código
         timer_trecho_codigo = delay_trecho_codigo
 
-        # endregion
-
         # Resetando a msg padrão de derrota
         indice_msg_final_jogo = 0
         msg_format_padrao_derrota1 = msg_format_padrao_derrota2 = msg_format_padrao_derrota3 = \
@@ -263,9 +255,12 @@ def coders_night():
         imprimiu_msg_padrao_vitoria1 = imprimiu_msg_padrao_vitoria2 = False
         imprimiu_msg_padrao_vitoria3 = imprimiu_msg_padrao_vitoria4 = False
 
+        # endregion
+
         # Limpando a tela
         tela_principal.fill(BLACK)
 
+        # region Preparando menu final
         if tela_menu_final:
             pygame.mixer.music.pause()
             if final_jogo == 'derrota':
@@ -284,15 +279,18 @@ def coders_night():
         atraso = True
         pular_escrita = False
 
-        lua.Stop_Animar()
-        estrela_0.Stop_Animar()
-        estrela_1.Stop_Animar()
-        estrela_2.Stop_Animar()
-        estrela_3.Stop_Animar()
-        estrela_4.Stop_Animar()
+        lua.stop_animar()
+        estrela_0.stop_animar()
+        estrela_1.stop_animar()
+        estrela_2.stop_animar()
+        estrela_3.stop_animar()
+        estrela_4.stop_animar()
+
+        #endregion
 
         # Trabalhando na tela do menu final
         while tela_menu_final:
+            #region Tela do menu final
             clk.tick(25)
             tela_principal.blit(fundo_jogo, (0, 0))
 
@@ -546,7 +544,9 @@ def coders_night():
                 timer_som_teclando_menu_final = delay_som_teclando_menu_final
 
             pygame.display.flip()
+            # endregion
 
+        #region Preparando menu inicial do jogo
         if tela_menu_inicial:
             pygame.mixer.music.load(os.path.join('Sons', 'som_fundo_tela_inicial.mp3'))
             pygame.mixer.music.set_volume(0.4)
@@ -573,10 +573,13 @@ def coders_night():
 
         ja_tocou_som_botao_selecionado = [False, False, False, False, False, False]
         ja_tocou_som_botao_selecionado[indice_dificuldade_selecionada_por_ultimo] = True
+        #endregion
 
         # Limpando a tela
         tela_principal.fill(BLACK)
+
         while tela_menu_inicial:
+            #region Tela inicial do jogo
             tela_principal.blit(fundo_jogo, (0, 0))
 
             # Configura a cor dos botões do menu
@@ -589,8 +592,6 @@ def coders_night():
             cor_botao_medio, cor_texto_botao_medio = funcoes_classes_auxiliares.configura_cor_botao(botao_medio_ativo)
             cor_botao_dificil, cor_texto_botao_dificil = funcoes_classes_auxiliares.configura_cor_botao(
                 botao_dificil_ativo)
-
-            # region Trabalhando o menu inicial do jogo
 
             # lua e estrelas
             grupo_sprites_janela.draw(tela_principal)
@@ -752,7 +753,7 @@ def coders_night():
             pygame.display.flip()
             # endregion
 
-        # Configurando dificuldade selecionada
+        #region Configurando dificuldade selecionada
         musica_tela_jogo = ''
         if escolheu_facil:
             dano_acabou_tempo = 60
@@ -775,6 +776,9 @@ def coders_night():
             timer_trecho_codigo = delay_trecho_codigo
             indice_dificuldade_selecionada_por_ultimo = 5
             musica_tela_jogo = ['som_fundo_level3.mp3', 0.15]
+        #endregion
+
+        #region Resetando variáveis e animações
 
         # Resetando barra de progresso do algoritmo
         tamanho_barra_progresso = 0
@@ -788,8 +792,6 @@ def coders_night():
         # Parando música da tela inicial
         pygame.mixer.music.pause()
 
-        # Limpando a tela
-        tela_principal.fill(BLACK)
 
         # Preparando tela do jogo principal (LEMBRA DE CONFIGURAR A MUSICA NO FINAL)
         tela_jogo_preparada = False
@@ -799,8 +801,13 @@ def coders_night():
         red_retangulo_tela_monitor = green_retangulo_tela_monitor = blue_retangulo_tela_monitor = 0
 
         transparencia_inicial = 0
+        #endregion
+
+        # Limpando a tela
+        tela_principal.fill(BLACK)
 
         while not tela_jogo_preparada:
+            #region Tela animada antes do começo do jogo
             clk.tick(30)
             tela_principal.blit(fundo_jogo, (0, 0))
 
@@ -900,10 +907,13 @@ def coders_night():
                     exit()
 
             pygame.display.flip()
+            #endregion
 
+        #region Colocando a música adequada à dificuldade
         pygame.mixer.music.load(os.path.join('Sons', musica_tela_jogo[0]))
         pygame.mixer.music.set_volume(musica_tela_jogo[1])
         pygame.mixer.music.play(-1)
+        #endregion
 
         # Laço principal do jogo
         while not tela_menu_inicial and not tela_menu_final:
@@ -1039,12 +1049,12 @@ def coders_night():
                 xicara.flutuar(posicao_xicara)
 
             # Animando as estrelas e a lua
-            lua.Animar()
-            estrela_0.Animar()
-            estrela_1.Animar()
-            estrela_2.Animar()
-            estrela_3.Animar()
-            estrela_4.Animar()
+            lua.animar()
+            estrela_0.animar()
+            estrela_1.animar()
+            estrela_2.animar()
+            estrela_3.animar()
+            estrela_4.animar()
 
             # Tremendo a tela_principal quando o player erra um caractere:
             if screen_shake > 0:
