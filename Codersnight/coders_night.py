@@ -87,6 +87,7 @@ def coders_night():
     posicao_estrela_2 = (150, 340)
     posicao_estrela_3 = (70, 370)
     posicao_estrela_4 = (350, 400)
+
     posicao_xicara = (980, 463)
 
     xicara = funcoes_classes_auxiliares.Xicara(tamanho=32 * 6, posicao_top_left=posicao_xicara)
