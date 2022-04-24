@@ -80,36 +80,38 @@ def coders_night():
 
     # imagens
 
-    img_cerebro = pygame.image.load(os.path.join('Imagens', 'brain.png')).convert_alpha()
-    img_cerebro = pygame.transform.scale(img_cerebro, (30, 30))
+    life_icon = pygame.image.load(os.path.join('Imagens', 'life_icon.png')).convert_alpha()
+    life_icon = pygame.transform.scale(life_icon, (30, 30))
 
-    img_energia = pygame.image.load(os.path.join('Imagens', 'icone_energia.png'))
-    img_energia = pygame.transform.scale(img_energia, (30, 30))
-    img_energia = pygame.transform.flip(img_energia, True, False)
+    energy_icon = pygame.image.load(os.path.join('Imagens', 'energy_icon.png'))
+    energy_icon = pygame.transform.scale(energy_icon, (30, 30))
+    energy_icon = pygame.transform.flip(energy_icon, True, False)
 
     # criando os objetos
     posicao_lua = (-70, -40)
     posicao_estrela_0 = (140, 45)
     posicao_estrela_1 = (20, 260)
-    posicao_estrela_2 = (100, 240)
+    posicao_estrela_2 = (150, 340)
     posicao_estrela_3 = (70, 370)
+    posicao_estrela_4 = (350, 400)
     posicao_xicara = (980, 463)
 
     xicara = funcoes_classes_auxiliares.Xicara(tamanho=32 * 6, posicao_top_left=posicao_xicara)
-    cerebro = funcoes_classes_auxiliares.FiguraClicavel(img_cerebro, (80, 620))
-    energia = funcoes_classes_auxiliares.FiguraClicavel(img_energia, (80, 670))
+    life_icon = funcoes_classes_auxiliares.FiguraClicavel((life_icon), (80, 620))
+    energy_icon = funcoes_classes_auxiliares.FiguraClicavel((energy_icon), (80, 670))
 
     lua = funcoes_classes_auxiliares.Moon(tamanho=32 * 12, posicao_top_left=posicao_lua)
     estrela_0 = funcoes_classes_auxiliares.Star(tamanho=32 * 6, posicao_top_left=posicao_estrela_0)
-    estrela_1 = funcoes_classes_auxiliares.Star(tamanho=32 * 6, posicao_top_left=posicao_estrela_1)
-    estrela_2 = funcoes_classes_auxiliares.Star(tamanho=32 * 6, posicao_top_left=posicao_estrela_2)
-    estrela_3 = funcoes_classes_auxiliares.Star(tamanho=32 * 6, posicao_top_left=posicao_estrela_3)
+    estrela_1 = funcoes_classes_auxiliares.Star(tamanho=32 * 5, posicao_top_left=posicao_estrela_1)
+    estrela_2 = funcoes_classes_auxiliares.Star(tamanho=32 * 3, posicao_top_left=posicao_estrela_2)
+    estrela_3 = funcoes_classes_auxiliares.Star(tamanho=32 * 4, posicao_top_left=posicao_estrela_3)
+    estrela_4 = funcoes_classes_auxiliares.Star(tamanho=32 * 4, posicao_top_left=posicao_estrela_4)
 
     # Grupo para os sprites
     grupo_sprites_permanentes = pygame.sprite.Group()
-    grupo_sprites_permanentes.add(cerebro, xicara, energia)
+    grupo_sprites_permanentes.add(life_icon, xicara, energy_icon)
     grupo_sprites_janela = pygame.sprite.Group()
-    grupo_sprites_janela.add(lua, estrela_0, estrela_1, estrela_2, estrela_3)
+    grupo_sprites_janela.add(lua, estrela_0, estrela_1, estrela_2, estrela_3, estrela_4)
 
     # clock
     clk: Clock = pygame.time.Clock()
@@ -288,6 +290,7 @@ def coders_night():
         estrela_1.Stop_Animar()
         estrela_2.Stop_Animar()
         estrela_3.Stop_Animar()
+        estrela_4.Stop_Animar()
 
         # Trabalhando na tela do menu final
         while tela_menu_final:
@@ -1042,6 +1045,7 @@ def coders_night():
             estrela_1.Animar()
             estrela_2.Animar()
             estrela_3.Animar()
+            estrela_4.Animar()
 
             # Tremendo a tela_principal quando o player erra um caractere:
             if screen_shake > 0:
