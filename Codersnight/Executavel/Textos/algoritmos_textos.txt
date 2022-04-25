@@ -1,0 +1,36 @@
+#
+n = int(input('Digite um numero natural: '))
+if n == 1 or n == 0:
+    print('O numero nao eh primo!')
+else:
+    divisor = 0
+    iterador = 2
+    while iterador <= n / 2 and divisor < 2:
+        if n % iterador == 0:
+            divisor += 1
+        iterador += 1
+    if divisor == 2:
+        print('O numero nao eh primo!')
+    else:
+        print('O numero eh primo!')
+#
+p1 = float(input('primeiro termo: '))
+p1_copia = p1
+r = float(input('Razao: '))
+print('\n10 primeiros termos:', end = ' ')
+while True:
+    print(p1, end = ' ')
+    p1 += r
+    if p1 == p1_copia + 10*r:
+        break
+#
+def fibonacci(n):
+	if n >= 0:
+		if n == 0:
+			return 0
+		if n == 1 or n == 2:
+			return 1
+		return fibonacci(n - 1) + fibonacci(n - 2)
+n = 20
+for i in range(n):
+	print(fibonacci(i), end=' ')
